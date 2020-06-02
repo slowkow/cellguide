@@ -9,7 +9,7 @@ This project depends on [Cell Browser] by [Maximilian Haeussler].
 Here is some of the scRNA-seq data from the research article by [Smillie et al. 2019][3].
 
 <p align="center">
-<img src="cellguide.png" width="80%" align="center" />
+<img src="https://i.imgur.com/Hyxk0P6.png" width="80%" align="center" />
 </p>
 
 ### Features
@@ -25,7 +25,7 @@ Here is some of the scRNA-seq data from the research article by [Smillie et al. 
 [3]: https://doi.org/10.1016/j.cell.2019.06.029
 
 <p align="center">
-<img src="cellguide.gif" width="80%" align="center" />
+<img src="https://i.imgur.com/UcpBijf.gif" width="80%" align="center" />
 </p>
 
 ## Quick Start
