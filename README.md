@@ -9,7 +9,21 @@ This project depends on [Cell Browser] by [Maximilian Haeussler].
 
 ## Overview
 
+<p align="center">
 <img src="cellguide.png" width="80%" align="center" />
+</p>
+
+### Features
+
+- Display metadata on the UMAP figure
+- Display gene expression on the UMAP figure
+- Aggregate statistics for cell clusters and metadata categories
+- Find any gene, instantly
+- Browse statistics for every gene
+
+The scRNA-seq data shown in the screenshot is available [here][2].
+
+[2]: https://singlecell.broadinstitute.org/single_cell/study/SCP259/intra-and-inter-cellular-rewiring-of-the-human-colon-during-ulcerative-colitis
 
 ## Quick Start
 
