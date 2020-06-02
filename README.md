@@ -1,4 +1,4 @@
-# Cell Guide 🧭 🧙‍♂️  <img src="cellguide.png" width="50%" align="right" />
+# Cell Guide 🧭 🧙‍♂️ 
 
 **Cell Guide** helps you to navigate large single-cell RNA-seq datasets in your web browser.
 
@@ -9,7 +9,7 @@ This project depends on [Cell Browser] by [Maximilian Haeussler].
 
 ## Overview
 
-
+<img src="cellguide.png" width="80%" align="center" />
 
 ## Quick Start
 
