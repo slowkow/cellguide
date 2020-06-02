@@ -6,7 +6,7 @@ This project depends on [Cell Browser] by [Maximilian Haeussler].
 
 [Maximilian Haeussler]: https://github.com/maximilianh
 
-Here is the scRNA-seq data from the research article by [Smillie et al. 2019][3].
+Here is some of the scRNA-seq data from the research article by [Smillie et al. 2019][3].
 
 <p align="center">
 <img src="cellguide.png" width="80%" align="center" />
@@ -55,6 +55,8 @@ TODO: image of cellBrowser user interface
 ```
 TODO
 ```
+
+Make sure to refresh your web browser with <kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> (or <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> on Windows).
 
 [1]: https://cellbrowser.readthedocs.io/basic_usage.html
 
