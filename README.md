@@ -1,4 +1,4 @@
-# Cell Guide 🧭 🧙‍♂️ 
+<h1> Cell Guide 🧭 🧙‍♂️ </h1>
 
 **Cell Guide** helps you to navigate large single-cell RNA-seq datasets in your web browser.
 
