@@ -6,9 +6,7 @@ This project depends on [Cell Browser] by [Maximilian Haeussler].
 
 [Maximilian Haeussler]: https://github.com/maximilianh
 
-
-## Overview
-
+Here is the scRNA-seq data from the research article by [Smillie et al. 2019][3].
 <p align="center">
 <img src="cellguide.png" width="80%" align="center" />
 </p>
@@ -21,9 +19,9 @@ This project depends on [Cell Browser] by [Maximilian Haeussler].
 - Find any gene, instantly
 - Browse statistics for every gene
 
-The scRNA-seq data shown in the screenshot is available [here][2].
 
 [2]: https://singlecell.broadinstitute.org/single_cell/study/SCP259/intra-and-inter-cellular-rewiring-of-the-human-colon-during-ulcerative-colitis
+[3]: https://doi.org/10.1016/j.cell.2019.06.029
 
 ## Quick Start
 
