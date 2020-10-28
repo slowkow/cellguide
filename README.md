@@ -83,18 +83,18 @@ Haeussler].
 
 Built with:
 
-- [D3.js](https://d3js.org)
-- [d3-legend](https://github.com/susielu/d3-legend)
 - [Bootstrap](https://getbootstrap.com)
-- [jQuery](https://jquery.com)
-- [palette.js](https://github.com/google/palette.js/tree/master)
-- [JSURL2](https://www.npmjs.com/package/@yaska-eu/jsurl2)
-- [papaparse](https://www.papaparse.com/)
-- [pako](https://github.com/nodeca/pako)
-- [FastBitSet](https://github.com/lemire/FastBitSet.js/)
-- [tablesort](https://github.com/tristen/tablesort)
-- [hcluster.js](https://github.com/cmpolis/hcluster.js/)
 - [CSS loaders](https://projects.lukehaas.me/css-loaders/)
+- [d3-legend](https://github.com/susielu/d3-legend)
+- [D3.js](https://d3js.org)
+- [FastBitSet](https://github.com/lemire/FastBitSet.js/)
+- [hcluster.js](https://github.com/cmpolis/hcluster.js/)
+- [jQuery](https://jquery.com)
+- [JSURL2](https://www.npmjs.com/package/@yaska-eu/jsurl2)
+- [pako](https://github.com/nodeca/pako)
+- [palette.js](https://github.com/google/palette.js/tree/master)
+- [papaparse](https://www.papaparse.com/)
+- [tablesort](https://github.com/tristen/tablesort)
 
 
 Let me know what you think! [@slowkow](https://twitter.com/slowkow)
