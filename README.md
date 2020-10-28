@@ -1,16 +1,8 @@
-# Cell Guide 🧭 🧙‍♂️ 
+# Cell Guide 🧭 
 
-**Cell Guide** helps you to navigate large single-cell RNA-seq datasets in your web browser.
+**Cell Guide** helps you to navigate large single-cell RNA-seq datasets in your
+web browser.
 
-This project depends on [Cell Browser] by [Maximilian Haeussler].
-
-[Maximilian Haeussler]: https://github.com/maximilianh
-
-Here is some of the scRNA-seq data from the research article by [Smillie et al. 2019][3].
-
-<p align="center">
-<img src="https://i.imgur.com/Hyxk0P6.png" width="80%" align="center" />
-</p>
 
 ### Features
 
@@ -20,35 +12,41 @@ Here is some of the scRNA-seq data from the research article by [Smillie et al. 
 - Find any gene, instantly
 - Browse statistics for every gene
 
+Here is some of the scRNA-seq data from the research article by [Smillie et al. 2019][3].
 
 [2]: https://singlecell.broadinstitute.org/single_cell/study/SCP259/intra-and-inter-cellular-rewiring-of-the-human-colon-during-ulcerative-colitis
 [3]: https://doi.org/10.1016/j.cell.2019.06.029
 
 <p align="center">
-<img src="https://i.imgur.com/UcpBijf.gif" width="80%" align="center" />
+<img src="https://i.imgur.com/tcYRggc.gif" width="80%" align="center" />
 </p>
+
+<p align="center">
+<img src="https://i.imgur.com/4Ovpb5Z.gif" width="80%" align="center" />
+</p>
+
 
 ## Quick Start
 
 ### Step 1. Install Cell Browser
 
-We can quickly install Cell Browser using pip:
-
-[Cell Browser]: https://github.com/maximilianh/cellBrowser
+We can install the Cell Browser Python package with pip:
 
 ```
 pip install cellbrowser
 ```
 
-Or see [more installation instructions](https://cellbrowser.readthedocs.io/installation.html).
+Or see the [Cell Browser installation instructions](https://cellbrowser.readthedocs.io/installation.html).
 
 ### Step 2. Create a browser for your data
 
-See the [instructions][1] for creating a Cell Browser for your data.
+See the [documentation][1] for how to create a Cell Browser for your data.
 
 When your browser is working, it should look something like this:
 
-TODO: image of cellBrowser user interface
+<p align="center">
+<img src="https://i.imgur.com/RkM4V34.png" width="80%" align="center" />
+</p>
 
 ### Step 3. Copy Cell Guide files
 
@@ -60,12 +58,30 @@ Make sure to refresh your web browser with <kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>
 
 [1]: https://cellbrowser.readthedocs.io/basic_usage.html
 
-## How does Cell Guide work?
 
-Cell Guide provides an alternative user interface for Cell Browser.
+## Dependencies
 
-The reason I chose to write an extension for Cell Browser is because it has these features:
+The current version of Cell Guide depends on [Cell Browser] by [Maximilian
+Haeussler].
 
-- The user interface is built with static HTML and Javascript files.
-- The data is stored in compressed and indexed data files.
-- Javascript on the client-side sends range requests to retrieve small pieces of the data files.
+[Cell Browser]: https://github.com/maximilianh/cellBrowser
+[Maximilian Haeussler]: https://github.com/maximilianh
+
+Built with:
+
+- [D3.js](https://d3js.org)
+- [d3-legend](https://github.com/susielu/d3-legend)
+- [Bootstrap](https://getbootstrap.com)
+- [jQuery](https://jquery.com)
+- [palette.js](https://github.com/google/palette.js/tree/master)
+- [JSURL2](https://www.npmjs.com/package/@yaska-eu/jsurl2)
+- [papaparse](https://www.papaparse.com/)
+- [pako](https://github.com/nodeca/pako)
+- [FastBitSet](https://github.com/lemire/FastBitSet.js/)
+- [tablesort](https://github.com/tristen/tablesort)
+- [hcluster.js](https://github.com/cmpolis/hcluster.js/)
+- [CSS loaders](https://projects.lukehaas.me/css-loaders/)
+
+
+Let me know what you think! [@slowkow](https://twitter.com/slowkow)
+

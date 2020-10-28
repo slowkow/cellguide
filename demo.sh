@@ -1,15 +1,12 @@
 #!/bin/bash
-set -u
-
-# Make a temporary directory.
-dir=$(mktemp -d -t cellguide-XXXXX)
+set -eoxu pipefail
 
 # Download a small example dataset.
-curl -s https://cells.ucsc.edu/downloads/samples/mini.tgz | tar xvz
+curl http://cells.ucsc.edu/downloads/samples/mini.tgz | tar xvz
 
 # Build the Cell Browser HTML files.
 cd mini
-cbBuild -o $dir
+cbBuild -o public_html
 
 # # Downlod the Cell Guide files.
 # cd $dir
@@ -19,5 +16,5 @@ cbBuild -o $dir
 # cp -r cellguide-1.0.0/html/* .
 
 # Start the web server
-cbBuild -o $dir -p 8888
+cbBuild -o public_html -p 8888
 
