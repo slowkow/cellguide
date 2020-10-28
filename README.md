@@ -16,9 +16,14 @@ Here is some of the scRNA-seq data from the research article by [Smillie et al. 
 [2]: https://singlecell.broadinstitute.org/single_cell/study/SCP259/intra-and-inter-cellular-rewiring-of-the-human-colon-during-ulcerative-colitis
 [3]: https://doi.org/10.1016/j.cell.2019.06.029
 
-<p align="center">
+<table>
+  <tr>
+    <td width="20%">Flip through metadata variables and see them in the low-dimensional space.</td>
+<td><p align="center">
 <img src="https://i.imgur.com/tcYRggc.gif" width="80%" align="center" />
-</p>
+  </p></td>
+  </tr>
+</table>
 
 <p align="center">
 <img src="https://i.imgur.com/4Ovpb5Z.gif" width="80%" align="center" />
