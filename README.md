@@ -63,7 +63,7 @@ When your browser is working, it should look something like this:
 
 ### Step 3. Copy Cell Guide files
 
-```
+```bash
 # Get the Cell Guide code
 curl -s https://codeload.github.com/slowkow/cellguide/tar.gz/master | tar xvz
  
