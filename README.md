@@ -58,7 +58,7 @@ See the [documentation][1] for how to create a Cell Browser for your data.
 When your browser is working, it should look something like this:
 
 <p align="center">
-<img src="https://i.imgur.com/RkM4V34.png" width="80%" align="center" />
+<img src="https://i.imgur.com/N1B2Q5U.png" width="80%" align="center" />
 </p>
 
 ### Step 3. Copy Cell Guide files
