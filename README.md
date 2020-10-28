@@ -13,11 +13,6 @@ Try it at https://cell.guide
 - Find any gene, instantly
 - Browse statistics for every gene
 
-Here is some of the scRNA-seq data from the research article by [Smillie et al. 2019][3].
-
-[2]: https://singlecell.broadinstitute.org/single_cell/study/SCP259/intra-and-inter-cellular-rewiring-of-the-human-colon-during-ulcerative-colitis
-[3]: https://doi.org/10.1016/j.cell.2019.06.029
-
 <table>
   <tr>
     <td width="20%">Flip through donor variables and see them in low-dimensional space.</td>
@@ -38,6 +33,10 @@ Here is some of the scRNA-seq data from the research article by [Smillie et al. 
   </td>
   </tr>
 </table>
+
+Demo scRNA-seq data from the research article by [Smillie et al. 2019][3].
+
+[3]: https://doi.org/10.1016/j.cell.2019.06.029
 
 
 ## Quick Start
