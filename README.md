@@ -2,6 +2,8 @@
 
 Navigate single-cell RNA-seq datasets in your web browser.
 
+Try it at https://cell.guide
+
 
 ### Features
 
@@ -18,16 +20,24 @@ Here is some of the scRNA-seq data from the research article by [Smillie et al. 
 
 <table>
   <tr>
-    <td width="20%">Flip through metadata variables and see them in the low-dimensional space.</td>
-<td><p align="center">
-<img src="https://i.imgur.com/tcYRggc.gif" width="80%" align="center" />
-  </p></td>
+    <td width="20%">Flip through donor variables and see them in low-dimensional space.</td>
+    <td>
+      <p align="center">
+        <img src="https://i.imgur.com/tcYRggc.gif" width="80%" align="center" />
+      </p>
+    </td>
   </tr>
 </table>
-
-<p align="center">
-<img src="https://i.imgur.com/4Ovpb5Z.gif" width="80%" align="center" />
-</p>
+<table>
+  <tr>
+  <td width="20%">Select any gene and see expression across clusters and donor variables.</td>
+  <td>
+    <p align="center">
+      <img src="https://i.imgur.com/4Ovpb5Z.gif" width="80%" align="center" />
+    </p>
+  </td>
+  </tr>
+</table>
 
 
 ## Quick Start
