@@ -64,8 +64,14 @@ When your browser is working, it should look something like this:
 ### Step 3. Copy Cell Guide files
 
 ```
-TODO
+# Get the Cell Guide code
+curl -s https://codeload.github.com/slowkow/cellguide/tar.gz/master | tar xvz
+ 
+# Overwrite the Cell Browser files: index.html js/ css/ ext/ img/
+command cp -rf cellguide-master/www/* public_html/
 ```
+
+For a complete example, see the [demo.sh](demo.sh) script.
 
 Make sure to refresh your web browser with <kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> (or <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> on Windows).
 

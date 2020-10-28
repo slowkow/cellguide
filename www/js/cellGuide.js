@@ -56,7 +56,7 @@ var mybrowser = function() {
   var state = {
     gene: "none",
     gene_groupby: "none",
-    meta: "cluster"
+    meta: "none"
   }
 
   // +-- container ------------------------------+
@@ -90,7 +90,7 @@ var mybrowser = function() {
 
     <div class="container" id="mycontainer">
 
-      <h2 id="mytitle">Smillie 2019: Epithelial cells</h2>
+      <h2 id="mytitle">Cell Guide</h2>
       <hr>
 
       <div id="display-meta" style="display:block;">
@@ -118,16 +118,6 @@ var mybrowser = function() {
 
       <div class="row">
           <div id="mytable" class="col-12"></div>
-      </div>
-
-      <div class="row my-5">
-        <div class="col-12">
-        <h2>Citation</h2>
-        <p>Please see the following publication to learn more about this dataset:</p>
-        <div class="border p-3 border-secondary">
-Smillie, C. S. et al. <a href="http://dx.doi.org/10.1016/j.cell.2019.06.029">Intra- and Inter-cellular Rewiring of the Human Colon during Ulcerative Colitis.</a> Cell 178, 714–730.e22 (2019)
-          </div>
-        </div>
       </div>
 
       <footer class="text-center mastfoot my-5">
@@ -560,7 +550,7 @@ Smillie, C. S. et al. <a href="http://dx.doi.org/10.1016/j.cell.2019.06.029">Int
         return draw_gene_bars_none(geneSym)
       }
 
-      let groupKey = "cluster"
+      let groupKey = db.conf.clusterField
       let groups = Array.from(
         d3.rollup(g_mydata, v => v.length, d => d[groupKey])
       )
@@ -731,7 +721,7 @@ Smillie, C. S. et al. <a href="http://dx.doi.org/10.1016/j.cell.2019.06.029">Int
 
     function draw_gene_bars_none(geneSym) {
 
-      let groupKey = "cluster"
+      let groupKey = db.conf.clusterField
       let groups = Array.from(
         d3.rollup(g_mydata, v => v.length, d => d[groupKey])
       )
@@ -852,7 +842,7 @@ Smillie, C. S. et al. <a href="http://dx.doi.org/10.1016/j.cell.2019.06.029">Int
           return
         }
 
-        let groupKey = "cluster"
+        let groupKey = db.conf.clusterField
         let groups = Array.from(
           d3.rollup(g_mydata, v => v.length, d => d[groupKey])
         )
@@ -1472,7 +1462,7 @@ Smillie, C. S. et al. <a href="http://dx.doi.org/10.1016/j.cell.2019.06.029">Int
       }
       //
       let data = g_mydata
-      const groupKey = "cluster"
+      const groupKey = db.conf.clusterField
       const fillKey = meta_groupby // TBStatus, case/control, etc.
       const aggKey = "donor"
       const agg_counts = Object.fromEntries(
@@ -1719,7 +1709,6 @@ Smillie, C. S. et al. <a href="http://dx.doi.org/10.1016/j.cell.2019.06.029">Int
     }
 
     function draw_meta_heatmap(groupKey, subgroupKey) {
-      // groupKey = "cluster", fillKey = "health"
       $("#meta-heatmap").html("")
       //
       let metaInfo = db.findMetaInfo(subgroupKey)
@@ -1947,7 +1936,7 @@ Smillie, C. S. et al. <a href="http://dx.doi.org/10.1016/j.cell.2019.06.029">Int
       }
       //
       let data = g_mydata
-      const groupKey = "cluster"
+      const groupKey = db.conf.clusterField
       const fillKey = gene_groupby
       let metaInfo = db.findMetaInfo(fillKey)
       let subgroupLevels = metaInfo.valCounts.map(d => d[0]).slice().sort()
@@ -2190,7 +2179,7 @@ Smillie, C. S. et al. <a href="http://dx.doi.org/10.1016/j.cell.2019.06.029">Int
     function draw_gene_boxplot_none(geneSym) {
       let data = g_mydata
       //
-      const groupKey = "cluster"
+      const groupKey = db.conf.clusterField
       var make_bin = function(d) {
         // d.sort((a, b) => a.gene - b.gene)
         // const values = d.map(d => d.gene)
@@ -2708,21 +2697,17 @@ Smillie, C. S. et al. <a href="http://dx.doi.org/10.1016/j.cell.2019.06.029">Int
       for (var i = 0; i < metaArr.length; i++) {
         g_mydata[i][fieldName] = metaInfo.valCounts[metaArr[i]][0];
       }
-      // loadGeneAndColor(state.gene) //"HMGB2")
-      // renderer.drawMetaHex(state.meta) //"cluster")
       colorByDefaultField()
     }
 
     // Set the title of the page
-    // setTitle(db.name)
-    setTitle("Smillie 2019: Epithelial cells")
+    setTitle(db.name)
 
-    var fieldName = "cluster"
-    var metaInfo = db.findMetaInfo(fieldName);
+    var metaInfo = db.findMetaInfo(db.conf.clusterField)
     db.loadMetaVec(metaInfo, gotMetaArr, onProgressConsole)
-    db.loadMetaVec(db.findMetaInfo("health"), gotMetaArr, onProgressConsole)
-    db.loadMetaVec(db.findMetaInfo("location"), gotMetaArr, onProgressConsole)
-    db.loadMetaVec(db.findMetaInfo("donor"), gotMetaArr, onProgressConsole)
+    // db.loadMetaVec(db.findMetaInfo("health"), gotMetaArr, onProgressConsole)
+    // db.loadMetaVec(db.findMetaInfo("location"), gotMetaArr, onProgressConsole)
+    // db.loadMetaVec(db.findMetaInfo("donor"), gotMetaArr, onProgressConsole)
   } // gotFirstCoords()
 
   function setTitle(text) {
@@ -2800,7 +2785,7 @@ Smillie, C. S. et al. <a href="http://dx.doi.org/10.1016/j.cell.2019.06.029">Int
     db.loadCoords(0, gotFirstCoords, onProgressConsole);
     // Show the table of gene markers for each cluster
     // onClusterNameClick("TA 1")
-    var metaInfo = db.findMetaInfo("cluster")
+    var metaInfo = db.findMetaInfo(db.conf.clusterField)
     var clusterNames = metaInfo.valCounts.map(d => d[0]).slice().sort()
     buildMarkerTables()
     onClusterNameClick(0, clusterNames[0])
@@ -2919,7 +2904,7 @@ Smillie, C. S. et al. <a href="http://dx.doi.org/10.1016/j.cell.2019.06.029">Int
   }
 
   function buildMarkerTables() {
-    var metaInfo = db.findMetaInfo("cluster")
+    var metaInfo = db.findMetaInfo(db.conf.clusterField)
 
     var clusterNames = metaInfo.valCounts.map(d => d[0]).slice().sort()
 
@@ -2966,7 +2951,7 @@ Smillie, C. S. et al. <a href="http://dx.doi.org/10.1016/j.cell.2019.06.029">Int
       if (fieldName.startsWith("custom") || fieldName.toLowerCase().startsWith("cell")) {
         continue
       }
-      if (fieldName === "cluster") {
+      if (fieldName === db.conf.clusterField) {
         div_colorby.push(`<option selected="selected" value="${fieldName}">${fieldLabel}</option>`)
       } else {
         div_colorby.push(`<option value="${fieldName}">${fieldLabel}</option>`)
@@ -3109,7 +3094,7 @@ Smillie, C. S. et al. <a href="http://dx.doi.org/10.1016/j.cell.2019.06.029">Int
   }
 
   function onClusterNameClick(clusterIndex, clusterName) {
-    var metaInfo = db.findMetaInfo("cluster")
+    var metaInfo = db.findMetaInfo(db.conf.clusterField)
 
     var tabInfo = db.conf.markers; // list with (label, subdirectory)
 
