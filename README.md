@@ -15,7 +15,7 @@ Try it at https://cell.guide
 
 <table>
   <tr>
-    <td width="20%">Flip through donor variables and see them in low-dimensional space.</td>
+    <td width="20%">Flip through metadata variables and see them in low-dimensional space.</td>
     <td>
       <p align="center">
         <img src="https://i.imgur.com/tcYRggc.gif" width="80%" align="center" />
@@ -23,12 +23,24 @@ Try it at https://cell.guide
     </td>
   </tr>
 </table>
+
 <table>
   <tr>
-  <td width="20%">Select any gene and see expression across clusters and donor variables.</td>
   <td>
     <p align="center">
-      <img src="https://i.imgur.com/4Ovpb5Z.gif" width="80%" align="center" />
+      <img src="https://i.imgur.com/zBVTCy9.png" width="80%" align="center" />
+    </p>
+  </td>
+  <td width="20%">See which donors have similar proportions of different cell clusters.</td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+  <td width="20%">Find any gene and see expression across clusters, faceted by metadata variables.</td>
+  <td>
+    <p align="center">
+      <img src="https://i.imgur.com/KgMw3zN.gif" width="80%" align="center" />
     </p>
   </td>
   </tr>
