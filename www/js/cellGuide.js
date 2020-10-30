@@ -106,6 +106,7 @@ var mybrowser = function() {
       </div>
 
       <div id="display-gene" style="display:block;height:500px;">
+          <h3>Gene expression</h3>
         <div class="row">
           <div id="gene-loading-spinner" class="col-2 offset-5">
             <div class="loader"></div>
@@ -1361,32 +1362,38 @@ var mybrowser = function() {
             .attr("font-style", "italic")
             .text(geneSym)
         }
+        
+        // Count the cells per subgroup
+        if (plot_total === 1) {
+          var n_cells = data.filter(d => d.gene > 0).length
+          var total_cells = data.length
+        } else {
+          var n_cells = data
+            .filter(
+              d => d.gene > 0 && d[subgroupKey] == subgroupLevels[plot_i]
+            ).length
+          var total_cells = data
+            .filter(d => d[subgroupKey] == subgroupLevels[plot_i])
+            .length
+        }
 
         if (plot_total > 1) {
-          var subgroup_n = subgroupCounts[subgroupLevels[plot_i]]
+          // var subgroup_n = subgroupCounts[subgroupLevels[plot_i]]
           svg.append("text")
             .attr("x", (plot_width / canvas_scale) / 2)
             .attr("y", margin.top - 15)
             .attr("text-anchor", "middle")
             .attr("font-family", "sans-serif")
             .attr("font-size", `${font_size}px`)
-            .text(`${subgroupLevels[plot_i]} (n = ${subgroup_n})`)
+            .text(`${subgroupLevels[plot_i]} (n = ${d3.format(",")(total_cells)})`)
         }
 
-        if (plot_total === 1) {
-          var n_cells = data.filter(d => d.gene > 0).length
-        } else {
-          var n_cells = data
-            .filter(
-              d => d.gene > 0 && d[subgroupKey] == subgroupLevels[plot_i]
-            ).length
-        }
         svg.append("text")
           .attr("x", margin.left / 2)
           .attr("y", plot_height / canvas_scale - margin.bottom / 2)
           .attr("font-family", "sans-serif")
           .attr("font-size", `${font_size}px`)
-          .text(`${d3.format(",")(n_cells)} (${d3.format(".1%")(n_cells / data.length)}) cells`)
+          .text(`${d3.format(",")(n_cells)} (${d3.format(".1%")(n_cells / total_cells)}) cells`)
 
         let panelBorder = svg.append("rect")
           .attr("x", margin.left - 10)
@@ -1764,7 +1771,7 @@ var mybrowser = function() {
         group_names, (a, b) => d3.ascending(a.length, b.length)
       )
       const margin = {
-        top: 35, right: 160, bottom: 35,
+        top: 40, right: 160, bottom: 35,
         left: getTextWidth(longest_group_key, "15px arial") + 9
       }
       d3.select("#meta-row-2").style("height", `${height + margin.top + margin.bottom}px`)
@@ -2701,13 +2708,20 @@ var mybrowser = function() {
     }
 
     // Set the title of the page
-    setTitle(db.name)
+    setTitle(db.conf.shortLabel)
 
     var metaInfo = db.findMetaInfo(db.conf.clusterField)
     db.loadMetaVec(metaInfo, gotMetaArr, onProgressConsole)
-    // db.loadMetaVec(db.findMetaInfo("health"), gotMetaArr, onProgressConsole)
-    // db.loadMetaVec(db.findMetaInfo("location"), gotMetaArr, onProgressConsole)
-    // db.loadMetaVec(db.findMetaInfo("donor"), gotMetaArr, onProgressConsole)
+    
+    var meta_fields = db.conf.metaFields
+      .filter(
+        d => d.type == "enum" &&
+        (d.valCounts.length <= 8 && d.name != "custom") |
+        (d.name == "donor")
+      )
+    for (const meta_field of meta_fields) {
+      db.loadMetaVec(db.findMetaInfo(meta_field.name), gotMetaArr, onProgressConsole)
+    }
   } // gotFirstCoords()
 
   function setTitle(text) {
@@ -2733,40 +2747,6 @@ var mybrowser = function() {
     }
     return oldToNew;
   }
-
-  // function gotCoords(coords, info, clusterInfo, newRadius) {
-  //  /* called when the coordinates have been loaded */
-  //  if (coords.length===0)
-  //    alert("cellBrowser.js/gotCoords: coords.bin seems to be empty");
-  //  var opts = {};
-  //  if (newRadius)
-  //    opts["radius"] = newRadius;
-
-  //  g_coords = coords;
-
-  //  // labels can be overriden by the user cart
-  //  var labelField = db.conf.labelField;
-  //  if (labelField) {
-  //    var metaInfo = db.findMetaInfo(labelField);
-  //    var oldToNew = makeLabelRenames(metaInfo);
-  //  }
-
-  //  var origLabels = [];
-  //  var clusterMids = clusterInfo.labels;
-  //  // old-style files contain just coordinates, no order
-  //  if (clusterMids===undefined)
-  //    clusterMids = clusterInfo;
-
-  //  for (var i = 0; i < clusterMids.length; i++) {
-  //    var labelInfo = clusterMids[i];
-  //    var oldName = labelInfo[2];
-  //    origLabels.push(oldName);
-  //    var newName = oldToNew[oldName];
-  //    labelInfo[2] = newName;
-  //  }
-
-  //  db.clusterOrder = clusterInfo.order;
-   // }
 
   function onConfigLoaded(datasetName) { 
     // this is a collection if it does not have any field information
@@ -2925,7 +2905,7 @@ var mybrowser = function() {
     //   if (fieldName.startsWith("custom") || fieldName.toLowerCase().startsWith("cell")) {
     //     continue
     //   }
-    //   var selected = fieldName == "cluster"
+    //   var selected = fieldName == db.conf.clusterField
     //   htmls.push(
     //     `<a class="nav-metadata nav-item nav-link ${selected ? 'active' : ''}"
     //     id="nav-metadata-${fieldName}"
@@ -2977,7 +2957,7 @@ var mybrowser = function() {
       `
     ]
     var meta_fields = db.conf.metaFields
-      .filter(d => d.type == "enum" && d.valCounts.length <= 8)
+      .filter(d => d.type == "enum" && d.valCounts.length <= 8 && d.name != "custom")
     div_groupby.push(`<option value="none">None</option>`)
     for (let meta_field of meta_fields) {
       div_groupby.push(`<option value="${meta_field.name}">${meta_field.label}</option>`)
