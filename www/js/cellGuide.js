@@ -1280,7 +1280,7 @@ var mybrowser = function() {
         top: 65, right: 0, bottom: 0, left: 5
       }
       let margin = {
-        top: 45, right: 10, bottom: 10, left: 10
+        top: 65, right: 10, bottom: 10, left: 10
       }
       //
       d3.select("#gene-loading-spinner").remove()
@@ -1291,6 +1291,9 @@ var mybrowser = function() {
         .attr("id", "gene-row")
       //
       const plot_total = subgroupKey ? subgroupLevels.length : 1
+      if (plot_total === 1) {
+        margin.top = 45
+      }
       var plot_col_width = 12
       var font_size = 14
       if (plot_total > 1) {
@@ -1353,7 +1356,15 @@ var mybrowser = function() {
           .style("top", $(`#${div_id}`).css("padding-top"))
           .style("left", $(`#${div_id}`).css("padding-left"))
 
-        if (plot_i === 0) {
+        if (plot_i === 0 && plot_total > 1) {
+          svg.append("text")
+            .attr("x", margin.left)
+            .attr("y", margin.top - 35)
+            .attr("font-family", "sans-serif")
+            .attr("font-size", `${font_size * 1.4}px`)
+            .attr("font-style", "italic")
+            .text(geneSym)
+        } else if (plot_i === 0 && plot_total === 1) {
           svg.append("text")
             .attr("x", margin.left)
             .attr("y", margin.top - 15)
