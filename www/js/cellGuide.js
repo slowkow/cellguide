@@ -100,8 +100,14 @@ var mybrowser = function() {
         </div>
         <div id="mycontrols" class="row mb-4">
         </div>
+        <div>
+          <h3>Heatmap of cell counts</h3>
+          <a class="btn btn-secondary" data-toggle="collapse" href="#collapse-heatmap" role="button" aria-expanded="false" aria-controls="collapse-heatmap">Show / Hide</a>
+        </div>
+        <div class="collapse show" id="collapse-heatmap">
         <div id="meta-row-2" class="row">
           <div id="meta-heatmap" class="col-12"></div>
+        </div>
         </div>
       </div>
 
@@ -148,8 +154,7 @@ var mybrowser = function() {
       var metaInfo = db.findMetaInfo(fieldName);
 
       if (metaInfo.type == "enum") {
-        var meta_valcounts = metaInfo.valCounts.slice()
-          .sort((a,b) => a[0].localeCompare(b[0]))
+        var meta_valcounts = get_groups(fieldName)
         var this_pal = metaInfo.valCounts.length <= pals.okabe.length ?
           pals.okabe : pals.mpn65
         var metaColors = {}
@@ -552,10 +557,7 @@ var mybrowser = function() {
       }
 
       let groupKey = db.conf.clusterField
-      let groups = Array.from(
-        d3.rollup(g_mydata, v => v.length, d => d[groupKey])
-      )
-      groups = groups.sort((a,b) => a[0].localeCompare(b[0]))
+      let groups = get_groups(groupKey)
       let group_names = groups.map(d => d[0])
 
       let subgroupKey = metaInfo.name
@@ -723,10 +725,7 @@ var mybrowser = function() {
     function draw_gene_bars_none(geneSym) {
 
       let groupKey = db.conf.clusterField
-      let groups = Array.from(
-        d3.rollup(g_mydata, v => v.length, d => d[groupKey])
-      )
-      groups = groups.sort((a,b) => a[0].localeCompare(b[0]))
+      let groups = get_groups(groupKey)
       let group_names = groups.map(d => d[0])
 
       var data = []
@@ -844,10 +843,7 @@ var mybrowser = function() {
         }
 
         let groupKey = db.conf.clusterField
-        let groups = Array.from(
-          d3.rollup(g_mydata, v => v.length, d => d[groupKey])
-        )
-        groups = groups.sort((a,b) => a[0].localeCompare(b[0]))
+        let groups = get_groups(groupKey)
 
         // let subgroupKey = "health"
         // let subgroupLevels = ["Non-inflamed","Inflamed","Healthy"]
@@ -1255,6 +1251,7 @@ var mybrowser = function() {
     function drawGene4(geneSym, gene_groupby) {
       //
       let data = g_mydata
+      var aggKey = "donor"
       var metaInfo = null
       var subgroupKey = null
       var subgroupLevels = []
@@ -1265,7 +1262,7 @@ var mybrowser = function() {
           subgroupKey = metaInfo.name
           subgroupLevels = metaInfo.valCounts.map(d => d[0]).slice().sort()
           subgroupCounts = Object.fromEntries(d3.rollup(
-            data, v => [...new Set(v.map(d => d.donor))].length, d => d[subgroupKey]
+            data, v => [...new Set(v.map(d => d[aggKey]))].length, d => d[subgroupKey]
           ))
         }
       }
@@ -1489,12 +1486,12 @@ var mybrowser = function() {
       let metaInfo = db.findMetaInfo(fillKey)
       let subgroupLevels = metaInfo.valCounts.map(d => d[0]).slice().sort()
       let subgroupCounts = Object.fromEntries(d3.rollup(
-        data, v => [...new Set(v.map(d => d.donor))].length, d => d[fillKey]
+        data, v => [...new Set(v.map(d => d[aggKey]))].length, d => d[fillKey]
       ))
       var make_bin = function(d) {
         // percent of each donor's cells in each cluster
         const values = Array.from(d3.rollup(
-          d, v => v.length, d => d.donor
+          d, v => v.length, d => d[aggKey]
         )).map(d => d[1] / agg_counts[d[0]])
           .sort((a, b) => a - b)
         const min = values[0]
@@ -1723,7 +1720,7 @@ var mybrowser = function() {
       return db.conf.metaFields
         .filter(d => d.name == groupKey)[0]
         .valCounts.slice()
-        .sort((a,b) => a[0].localeCompare(b[0]))
+        .sort((a, b) => a[0].localeCompare(b[0], navigator.languages[0] || navigator.language, {numeric: true, ignorePunctuation: true}))
     }
 
     function draw_meta_heatmap(groupKey, subgroupKey) {
@@ -1782,7 +1779,7 @@ var mybrowser = function() {
         group_names, (a, b) => d3.ascending(a.length, b.length)
       )
       const margin = {
-        top: 40, right: 160, bottom: 35,
+        top: 50, right: 160, bottom: 50,
         left: getTextWidth(longest_group_key, "15px arial") + 9
       }
       d3.select("#meta-row-2").style("height", `${height + margin.top + margin.bottom}px`)
@@ -1956,19 +1953,20 @@ var mybrowser = function() {
       let data = g_mydata
       const groupKey = db.conf.clusterField
       const fillKey = gene_groupby
+      const aggKey = "donor"
       let metaInfo = db.findMetaInfo(fillKey)
       let subgroupLevels = metaInfo.valCounts.map(d => d[0]).slice().sort()
       let subgroupCounts = Object.fromEntries(d3.rollup(
-        data, v => [...new Set(v.map(d => d.donor))].length, d => d[fillKey]
+        data, v => [...new Set(v.map(d => d[aggKey]))].length, d => d[fillKey]
       ))
       var make_bin = function(d) {
         // d.sort((a, b) => a.gene - b.gene)
         // const values = d.map(d => d.gene).filter(x => x > 0).sort()
         // mean by donor
         var values = Object.values(Object.fromEntries(d3.rollup(
-          d, v => d3.mean(v.map(v => v.gene)), d => d.donor
+          d, v => d3.mean(v.map(v => v.gene)), d => d[aggKey]
         ))).sort((a,b) => a - b)
-        if (values.length > 10) {
+        if (values.length > 5) {
           const min = values[0]
           const max = values[values.length - 1]
           const q1 = d3.quantile(values, 0.25)
@@ -2184,7 +2182,7 @@ var mybrowser = function() {
         .attr("font-family", "sans-serif")
         .attr("font-size", "14px")
         // .attr("font-style", "italic")
-        .html(`Mean <tspan font-style="italic">${geneSym}</tspan> by donor`)
+        .html(`Mean <tspan font-style="italic">${geneSym}</tspan> by ${aggKey}`)
       // draw
       svg.append("g")
           .call(xAxis);
@@ -2198,6 +2196,7 @@ var mybrowser = function() {
       let data = g_mydata
       //
       const groupKey = db.conf.clusterField
+      const aggKey = "donor"
       var make_bin = function(d) {
         // d.sort((a, b) => a.gene - b.gene)
         // const values = d.map(d => d.gene)
@@ -2205,9 +2204,9 @@ var mybrowser = function() {
         //   .sort((a, b) => a - b)
         // mean by donor
         var values = Object.values(Object.fromEntries(d3.rollup(
-          d, v => d3.mean(v.map(v => v.gene)), d => d.donor
+          d, v => d3.mean(v.map(v => v.gene)), d => d[aggKey]
         ))).sort((a,b) => a - b)
-        if (values.length > 10) {
+        if (values.length > 5) {
           const min = values[0]
           const max = values[values.length - 1]
           const q1 = d3.quantile(values, 0.25)
@@ -2380,7 +2379,7 @@ var mybrowser = function() {
         .attr("font-family", "sans-serif")
         .attr("font-size", "14px")
         // .attr("font-style", "italic")
-        .html(`Mean <tspan font-style="italic">${geneSym}</tspan> by donor`)
+        .html(`Mean <tspan font-style="italic">${geneSym}</tspan> by ${aggKey}`)
       // draw
       svg.append("g")
           .call(xAxis);
