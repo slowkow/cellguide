@@ -2896,7 +2896,7 @@ var mybrowser = function() {
   function buildMarkerTables() {
     var metaInfo = db.findMetaInfo(db.conf.clusterField)
 
-    var clusterNames = metaInfo.valCounts.map(d => d[0]).slice().sort()
+    var clusterNames = metaInfo.valCounts.map(d => d[0]).slice().sort((a, b) => a.localeCompare(b, navigator.languages[0] || navigator.language, {numeric: true, ignorePunctuation: true}))
 
     var htmls = [];
 
