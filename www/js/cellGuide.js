@@ -805,6 +805,12 @@ var mybrowser = function() {
         .style("fill", "none")
         .style("stroke-width", "1px");
 
+      // bars
+      let color_range = data.length <= 8 ? pals.okabe : pals.mpn65
+      let color = d3.scaleOrdinal()
+        .domain(data.map(d => d[groupKey]))
+        .range(color_range)
+      //
       svg.append("g")
         .selectAll("g")
         .data(data)
@@ -813,7 +819,8 @@ var mybrowser = function() {
           .attr("y", d => y0(d[groupKey]))
           .attr("height", y0.bandwidth())
           .attr("width", d => x(d.value) - x(0))
-          .attr("fill", d => pals.okabe[0])
+          // .attr("fill", d => pals.okabe[0])
+          .attr("fill", d => color(d[groupKey]))
           .attr("stroke", "#000000")
           .attr("stroke-width", "0.5")
 
@@ -2051,18 +2058,9 @@ var mybrowser = function() {
       //
       var xAxis = g => g
         .attr("transform", `translate(0,${height - margin.bottom})`)
-        .call(d3.axisBottom(x).tickSizeOuter(0).ticks(5, "~d"))
+        .call(d3.axisBottom(x).tickSizeOuter(0).ticks(5, "~g"))
         .call(g => g.select(".domain").remove())
         .call(g => g.selectAll(".tick text").attr("font-size", "14px"))
-        // .call(d3.axisBottom(x).ticks(10, [5, "~g"]))
-        // .call(d3.axisBottom(x).ticks(10, [5, "~d"]))
-        // .call(g => g.select(".tick:last-of-type text").clone()
-        //     .attr("x", width - margin.right)
-        //     .attr("y", -5)
-        //     // .attr("text-anchor", "start")
-        //     .attr("font-weight", "bold")
-        //     .attr("font-size", 14)
-        //     .text("Log2CPM"))
       // x-axis label right
       svg.append("text")
         .attr("x", width - margin.right + 5)
@@ -2246,7 +2244,7 @@ var mybrowser = function() {
         bin["bin"] = make_bin(d[1])
         bins.push(bin)
       })
-      // bins = bins.sort((a,b) => a[groupKey].localeCompare(b[groupKey]))
+      bins = bins.sort((a, b) => a[groupKey].localeCompare(b[groupKey], navigator.languages[0] || navigator.language, {numeric: true, ignorePunctuation: true}))
       //
       let groups = get_groups(groupKey)
       let group_names = groups.map(d => d[0])
@@ -2266,8 +2264,6 @@ var mybrowser = function() {
       //
       var y0 = d3.scaleBand()
         .domain(group_names)
-        // .domain(bins.map(d => d[groupKey]))
-        // .rangeRound([margin.top, height - margin.bottom])
         .range([margin.top + 2, height - margin.bottom - 2])
         .paddingInner(0.1)
         .paddingOuter(0.0)
@@ -2280,11 +2276,9 @@ var mybrowser = function() {
       //
       var xAxis = g => g
         .attr("transform", `translate(0,${height - margin.bottom})`)
-        .call(d3.axisBottom(x).tickSizeOuter(0).ticks(5, "~d"))
+        .call(d3.axisBottom(x).tickSizeOuter(0).ticks(5, "~g"))
         .call(g => g.select(".domain").remove())
         .call(g => g.selectAll(".tick text").attr("font-size", "14px"))
-        // .call(d3.axisBottom(x).ticks(10, [5, "~g"]))
-        // .call(d3.axisBottom(x).ticks(10, [5, "~d"]))
       // x-axis label right
       svg.append("text")
         .attr("x", width - margin.right + 5)
@@ -2337,12 +2331,18 @@ var mybrowser = function() {
           .attr("cx", d => x(d))
           .attr("r", 1)
       // boxes
+      let color_range = bins.length <= 8 ? pals.okabe : pals.mpn65
+      let color = d3.scaleOrdinal()
+        .domain(bins.map(d => d[groupKey]))
+        .range(color_range)
+      //
       g.append("path")
           .attr("fill", "#333")
           .attr("transform",
             d => `translate(0,${y0(d[groupKey])})`
           )
-          .attr("fill", d => pals.okabe[0])
+          // .attr("fill", d => pals.okabe[0])
+          .attr("fill", d => color(d[groupKey]))
           .attr("stroke", "#000000")
           .attr("stroke-width", "0.5")
           .attr("d", d => `
@@ -2851,12 +2851,12 @@ var mybrowser = function() {
       g_binInfo = binInfo;
 
       if (g_mydata === null) {
-        for (var i = 0; i < decArr.length; i++) {
-          g_mydata.push({gene: decArr[i]});
+        for (var i = 0; i < exprArr.length; i++) {
+          g_mydata.push({gene: exprArr[i]});
         }
       } else {
-        for (var i = 0; i < decArr.length; i++) {
-          g_mydata[i]['gene'] = decArr[i];
+        for (var i = 0; i < exprArr.length; i++) {
+          g_mydata[i]['gene'] = exprArr[i];
         }
       }
       
