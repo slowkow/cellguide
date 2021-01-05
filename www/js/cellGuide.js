@@ -30,18 +30,40 @@ var pals = {
     '#698cff', '#d9d9d9', '#00d27e', '#d06800', '#009f82', '#c49200', '#cbe8ff',
     '#fecddf', '#c27eb6', '#8cd2ce', '#c4b8d9', '#f883b0', '#a49100', '#f48800',
     '#27d0df', '#a04a9b'
-  ]
+  ],
+  "batlow": [
+    "#001959", "#021C5A", "#041F59", "#04215B", "#06245B", "#07265B",
+    "#09295C", "#0A2C5C", "#0A2E5C", "#0C315D", "#0C335D", "#0D365D",
+    "#0F395F", "#0F3C5F", "#103F60", "#114160", "#124460", "#134660",
+    "#154A61", "#164C60", "#184F60", "#1A5260", "#1C5460", "#1E5761",
+    "#20595F", "#235C5F", "#255E5E", "#29605E", "#2C635C", "#2F655B",
+    "#336759", "#366858", "#3A6A56", "#3E6C54", "#416D53", "#456F50",
+    "#49704F", "#4D724C", "#50734B", "#547548", "#597645", "#5C7744",
+    "#607841", "#647940", "#687B3D", "#6C7B3C", "#707D39", "#757E37",
+    "#797F35", "#7D8133", "#818132", "#868330", "#8A842F", "#90862E",
+    "#95872D", "#9A872D", "#9F892D", "#A48A2D", "#AA8C2F", "#AF8D30",
+    "#B58D33", "#BB8F36", "#C08F38", "#C5903C", "#CA913F", "#CF9243",
+    "#D49347", "#D9944C", "#DE9651", "#E29755", "#E6985A", "#E9995F",
+    "#ED9B65", "#F19D6B", "#F39E70", "#F5A076", "#F7A17B", "#F9A380",
+    "#F9A486", "#FBA68B", "#FBA892", "#FDA997", "#FCAC9C", "#FDADA1",
+    "#FDAFA6", "#FDB0AC", "#FDB3B2", "#FDB5B7", "#FDB6BC", "#FDB9C2",
+    "#FDBAC7", "#FDBCCC", "#FDBDD2", "#FCC0D8", "#FBC2DD", "#FBC3E3",
+    "#FAC6E8", "#FAC7EE", "#FBCAF4", "#F9CCF9"
+  ].reverse(),
 }
 
 // Store one gene in a list of objects.
-var g_mydata = [];
+var g_mydata = []
 
-var g_count = 0;
-var g_loadGeneAndColor = 0;
+var g_healthField = "health"
+var g_donorField = "donor"
 
-var db = null;
-var g_coords = null;
-var g_exprArr, g_decArr, g_geneSym, g_geneDesc, g_binInfo;
+var g_count = 0
+var g_loadGeneAndColor = 0
+
+var db = null
+var g_coords = null
+var g_exprArr, g_decArr, g_geneSym, g_geneDesc, g_binInfo
 
 var mybrowser = function() {
   // var db = null; // the cbData object from cbData.js. Loads coords,
@@ -118,7 +140,7 @@ var mybrowser = function() {
             <div class="loader"></div>
           </div>
           <div id="mydiv-gene" class="col-6"></div>
-          <div id="gene-bars" class="col-3"></div>
+          <div id="gene-bars" class="col-3" style="min-height:450px;"></div>
           <div id="gene-boxplot" class="col-3"></div>
         </div>
       </div>
@@ -585,7 +607,7 @@ var mybrowser = function() {
 
       var el = $("#gene-bars")
       el.html("")
-      const height = Math.max(10 * groups.length * subgroupLevels.length, el.outerHeight())
+      const height = Math.min(10 * groups.length * subgroupLevels.length, el.outerHeight())
       let width = el.outerWidth() * 0.85
       const longest_group_key = d3.greatest(
         group_names, (a, b) => d3.ascending(a.length, b.length)
@@ -1258,7 +1280,7 @@ var mybrowser = function() {
     function drawGene4(geneSym, gene_groupby) {
       //
       let data = g_mydata
-      var aggKey = "donor"
+      var aggKey = g_donorField
       var metaInfo = null
       var subgroupKey = null
       var subgroupLevels = []
@@ -1322,8 +1344,11 @@ var mybrowser = function() {
       var bins = hexbin(data)
       // Sequential scale (works)
       var bin_max = d3.max(bins, bin => d3.mean(bin, d => d.gene))
-      var color = d3.scaleSequential(d3.interpolateBuPu)
-        .domain([0, bin_max])
+      // var color = d3.scaleSequential(d3.interpolateBuPu)
+      //   .domain([0, bin_max])
+      var color = d3.scaleLinear()
+        .domain(linspace(0, bin_max, 100))
+        .range(pals.batlow)
       // var color_range = linspace(color.domain()[0], color.domain()[1], 10)
       var color_range = linspace(0, bin_max, 10).reverse()
       var hex = new Path2D(hexbin.hexagon())
@@ -1486,10 +1511,11 @@ var mybrowser = function() {
       let data = g_mydata
       const groupKey = db.conf.clusterField
       const fillKey = meta_groupby // TBStatus, case/control, etc.
-      const aggKey = "donor"
-      const agg_counts = Object.fromEntries(
-        db.conf.metaFields.filter(d => d.name == aggKey)[0].valCounts
-      )
+      const aggKey = g_donorField
+      // const agg_counts = Object.fromEntries(
+      //   db.conf.metaFields.filter(d => d.name == aggKey)[0].valCounts
+      // )
+      const agg_counts = Object.fromEntries(get_groups(aggKey))
       let metaInfo = db.findMetaInfo(fillKey)
       let subgroupLevels = metaInfo.valCounts.map(d => d[0]).slice().sort()
       let subgroupCounts = Object.fromEntries(d3.rollup(
@@ -1734,12 +1760,9 @@ var mybrowser = function() {
       $("#meta-heatmap").html("")
       //
       let metaInfo = db.findMetaInfo(subgroupKey)
-      let subgroupLevels = metaInfo.valCounts.map(d => d[0]).slice().sort().reverse()
+      let subgroupLevels = metaInfo.valCounts.map(d => d[0]).slice().sort()
       //
-      const aggKey = "donor"
-      const agg_counts = Object.fromEntries(
-        db.conf.metaFields.filter(d => d.name == aggKey)[0].valCounts
-      )
+      const aggKey = g_donorField
       let groups = get_groups(groupKey)
       let group_names = groups.map(d => d[0])
       let data = Array.from(d3.rollup(
@@ -1960,7 +1983,7 @@ var mybrowser = function() {
       let data = g_mydata
       const groupKey = db.conf.clusterField
       const fillKey = gene_groupby
-      const aggKey = "donor"
+      const aggKey = g_donorField
       let metaInfo = db.findMetaInfo(fillKey)
       let subgroupLevels = metaInfo.valCounts.map(d => d[0]).slice().sort()
       let subgroupCounts = Object.fromEntries(d3.rollup(
@@ -2025,7 +2048,8 @@ var mybrowser = function() {
       var el = $("#gene-boxplot")
       el.html("")
       const width = el.outerWidth() * 1.15
-      const height = Math.max(10 * groups.length * subgroupLevels.length, el.outerHeight())
+      // const height = Math.max(6 * groups.length * subgroupLevels.length, el.outerHeight())
+      const height = Math.min(10 * groups.length * subgroupLevels.length, el.outerHeight())
       const margin = {top: 15, right: 165, bottom: 20, left: 10}
       //
       const svg = d3.select("#gene-boxplot").append('svg')
@@ -2194,7 +2218,7 @@ var mybrowser = function() {
       let data = g_mydata
       //
       const groupKey = db.conf.clusterField
-      const aggKey = "donor"
+      const aggKey = g_donorField
       var make_bin = function(d) {
         // d.sort((a, b) => a.gene - b.gene)
         // const values = d.map(d => d.gene)
@@ -2566,10 +2590,10 @@ var mybrowser = function() {
 
     renderer.drawMetaHex(colorBy) //"cluster")
 
-    if ("donor" in g_mydata[0] && "health" in g_mydata[0]) {
+    if (g_donorField in g_mydata[0] && g_healthField in g_mydata[0]) {
       // renderer.drawMetaBoxplot(colorBy, state.gene_groupby)
-      renderer.drawMetaBoxplot(colorBy, "health")
-      renderer.drawMetaHeatmap(colorBy, "health")
+      renderer.drawMetaBoxplot(colorBy, g_healthField)
+      renderer.drawMetaHeatmap(colorBy, g_healthField)
     }
 
     if (getVar("gene")!==undefined) {
@@ -2727,7 +2751,7 @@ var mybrowser = function() {
       .filter(
         d => d.type == "enum" &&
         (d.valCounts.length <= 8 && d.name != "custom") |
-        (d.name == "donor")
+        (d.name == g_donorField)
       )
     for (const meta_field of meta_fields) {
       db.loadMetaVec(db.findMetaInfo(meta_field.name), gotMetaArr, onProgressConsole)
@@ -3510,7 +3534,7 @@ var mybrowser = function() {
     var fieldName = ev.target.getAttribute("data-name");
     renderer.drawMetaHex(fieldName);
     // renderer.drawMetaBoxplot(fieldName, state.gene_groupby)
-    renderer.drawMetaBoxplot(fieldName, "health")
+    renderer.drawMetaBoxplot(fieldName, g_healthField)
   }
 
   function buildGeneCombo(htmls, id, left, width) {
