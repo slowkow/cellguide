@@ -410,10 +410,27 @@ var mybrowser = function() {
 
           // let color_range = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
           
-          let color_range = linspace(0, 1, 11)
-          var color = d3.scaleQuantile()
-            .domain(bins.map(bin => d3.mean(bin, d => d[fieldName])))
-            .range(color_range.map(d => d3.interpolateBuPu(d)))
+          // // Quantile scale (weird?)
+          // let color_range = linspace(0, 1, 11)
+          // var color = d3.scaleQuantile()
+          //   .domain(bins.map(bin => d3.mean(bin, d => d[fieldName])))
+          //   .range(color_range.map(d => d3.interpolateBuPu(d)))
+
+
+          // Sequential scale (works)
+          var extent = d3.extent(bins, bin => d3.mean(bin, d => d[fieldName]))
+          var color = null
+          var format = null
+          if (extent[0] < 0 && extent[1] > 0) {
+            color = d3.scaleDiverging()
+              .domain([extent[0], 0, extent[1]])
+              // .interpolator(d3.interpolatePiYG)
+              .interpolator(d3.interpolateRdYlBu)
+          } else {
+            color = d3.scaleSequential(d3.interpolateBuPu)
+              .domain([extent[0], extent[1]])
+          }
+          var color_range = linspace(extent[0], extent[1], 10)
 
           bins.forEach(function(bin) {
             context.translate(bin.x, bin.y)
@@ -422,71 +439,52 @@ var mybrowser = function() {
             context.setTransform(1, 0, 0, 1, 0, 0)
           });
 
-          svg.append("text")
-            .attr("x", plot_width / canvas_scale + legend_margin.left)
-            .attr("y", legend_margin.top)
-            .attr("font-family", "sans-serif")
-            .attr("font-size", "14px")
-            .attr("font-weight", "bold")
-            .text(metaInfo.label)
+          // svg.append("text")
+          //   .attr("x", plot_width / canvas_scale + legend_margin.left)
+          //   .attr("y", legend_margin.top)
+          //   .attr("font-family", "sans-serif")
+          //   .attr("font-size", "14px")
+          //   .attr("font-weight", "bold")
+          //   .text(metaInfo.label)
 
-          var legend = svg.selectAll("g.legend_colorbar")
-            .data(color.range().reverse())
-            .enter()
-            .append("g")
-            .attr("class","legend_colorbar");
+          vertical_legend({
+            svg: svg,
+            color: color,
+            title: metaInfo.label,
+            offsetLeft: plot_width / canvas_scale + legend_margin.left,
+            offsetTop: legend_margin.top
+          })
 
-          let legend_rect_height = 25
-
-          legend
-            .append('rect')
-            .attr("x", plot_width / canvas_scale + legend_margin.left)
-            .attr("y", function(d, i) {
-               return 20 + legend_margin.top + i * legend_rect_height;
-            })
-           .attr("width", 15)
-           .attr("height", legend_rect_height)
-           // .style("stroke", "black")
-           // .style("stroke-width", 0.1)
-           .style("fill", function(d){return d;});
-
-          legend
-            .append('text')
-            .attr("x", plot_width / canvas_scale + legend_margin.left + 20) //leave 5 pixel space after the <rect>
-            .attr("y", function(d, i) {
-             return 20 + legend_margin.top + i * legend_rect_height;
-            })
-            .attr("alignment-baseline", "middle")
-            // .attr("dy", "0.8em") //place text one line *below* the x,y point
-            .style("font-size","1em")
-            .text(function(d, i) {
-              // if (i % 2 == 0) {
-              var extent = color.invertExtent(d);
-              //extent will be a two-element array, format it however you want:
-              var format = d3.format(".2");
-              // if (i == color_range.length - 1) {
-              //   return `${format(+extent[0])} - ${format(+extent[1])}`
-              // }
-              return `${format(+extent[1])}`
-              // }
-            });
-            
-          // TODO Create just one text at the end instead of N texts
-          legend
-            .append("text")
-            .attr("x", plot_width / canvas_scale + legend_margin.left + 20)
-            .attr("y", 20 + legend_margin.top + color_range.length * legend_rect_height)
-            .attr("alignment-baseline", "middle")
-            // .attr("dy", "0.8em") //place text one line *below* the x,y point
-            .style("font-size","0.9em")
-            .text(function(d, i) {
-              var extent = color.invertExtent(d);
-              //extent will be a two-element array, format it however you want:
-              var format = d3.format(".0f");
-              if (i == color_range.length - 1) {
-                return `${format(+extent[0])}`
-              }
-            });
+          //var legend = svg.selectAll("g.legend_colorbar")
+          //  // .data(color.range().reverse())
+          //  .data(color_range)
+          //  .enter()
+          //  .append("g")
+          //  .attr("class", "legend_colorbar")
+          ////
+          //let legend_rect_height = (
+          //  plot_height / canvas_scale - legend_margin.top - legend_margin.bottom
+          //) / (color_range.length + 2)
+          ////
+          //legend
+          //  .append('rect')
+          //  .attr("x", plot_width / canvas_scale + legend_margin.left)
+          //  .attr("y", function(d, i) {
+          //    return legend_margin.top + (color_range.length - i - 0.5) * legend_rect_height
+          //  })
+          // .attr("width", 15)
+          // .attr("height", legend_rect_height)
+          // .style("fill", d => color(d))
+          ////
+          //legend
+          //  .append('text')
+          //  .attr("x", plot_width / canvas_scale + legend_margin.left + 20)
+          //  .attr("y", function(d, i) {
+          //    return legend_margin.top + (color_range.length - i) * legend_rect_height
+          //  })
+          //  .attr("alignment-baseline", "middle")
+          //  .style("font-size", "14px")
+          //  .text(d => d3.format(",.2r")(d))
 
         }
 
@@ -1349,7 +1347,6 @@ var mybrowser = function() {
       var color = d3.scaleLinear()
         .domain(linspace(0, bin_max, 100))
         .range(pals.batlow)
-      // var color_range = linspace(color.domain()[0], color.domain()[1], 10)
       var color_range = linspace(0, bin_max, 10).reverse()
       var hex = new Path2D(hexbin.hexagon())
       //
@@ -3590,6 +3587,160 @@ var mybrowser = function() {
     }
     return retval
   }
+
+  function ramp(color, n = 256) {
+    // const canvas = DOM.canvas(1, n);
+    var canvas = document.createElement("canvas")
+    canvas.width = 1
+    canvas.height = n
+    const context = canvas.getContext("2d");
+    for (let i = 0; i < n; ++i) {
+      context.fillStyle = color(i / (n - 1));
+      context.fillRect(0, n-i, 1, 1);
+    }
+    return canvas;
+  }
+
+  function vertical_legend({
+    svg,
+    color,
+    title,
+    tickSize = 3,
+    width = 26 + tickSize,
+    height = 320,
+    offsetLeft = 0,
+    offsetTop = 0,
+    marginTop = 10,
+    marginRight = 10 + tickSize,
+    marginBottom = 10,
+    marginLeft = 5,
+    ticks = height / 64,
+    tickFormat,
+    tickValues
+  } = {}) {
+
+    // let tickAdjust = g => g.selectAll(".tick line")
+      // .attr("x1", marginLeft - width + marginRight);
+    let tickAdjust = g => g.selectAll(".tick text")
+      .attr("font-size", "14px")
+      .attr("font-family", "sans-serif")
+      .attr("dx", 3)
+    let x;
+
+    // Continuous
+    if (color.interpolate) {
+      const n = Math.min(color.domain().length, color.range().length);
+
+      x = color.copy().rangeRound(d3.quantize(d3.interpolate(height - marginBottom, marginTop), n));
+
+      svg.append("image")
+          .attr("x", offsetLeft + marginLeft)
+          .attr("y", offsetTop + marginTop)
+          .attr("width", width - marginLeft - marginRight)
+          .attr("height", height - marginTop - marginBottom)
+          .attr("preserveAspectRatio", "none")
+          .attr("xlink:href", ramp(color.copy().domain(d3.quantize(d3.interpolate(0, 1), n))).toDataURL());
+    }
+
+    // Sequential
+    else if (color.interpolator) {
+      x = Object.assign(color.copy()
+          .interpolator(d3.interpolateRound(height - marginBottom, marginTop)),
+          {range() { return [height - marginBottom, marginTop]; }});
+
+      svg.append("image")
+          .attr("x", offsetLeft + marginLeft)
+          .attr("y", offsetTop + marginTop)
+          .attr("width", width - marginLeft - marginRight)
+          .attr("height", height - marginTop - marginBottom)
+          .attr("preserveAspectRatio", "none")
+          .attr("xlink:href", ramp(color.interpolator()).toDataURL());
+
+      // scaleSequentialQuantile doesn’t implement ticks or tickFormat.
+      if (!x.ticks) {
+        if (tickValues === undefined) {
+          const n = Math.round(ticks + 1);
+          tickValues = d3.range(n).map(i => d3.quantile(color.domain(), i / (n - 1)));
+        }
+        if (typeof tickFormat !== "function") {
+          tickFormat = d3.format(tickFormat === undefined ? ",f" : tickFormat);
+        }
+      }
+    }
+
+    // Threshold
+    else if (color.invertExtent) {
+      const thresholds
+          = color.thresholds ? color.thresholds() // scaleQuantize
+          : color.quantiles ? color.quantiles() // scaleQuantile
+          : color.domain(); // scaleThreshold
+
+      const thresholdFormat
+          = tickFormat === undefined ? d => d
+          : typeof tickFormat === "string" ? d3.format(tickFormat)
+          : tickFormat;
+
+      x = d3.scaleLinear()
+          .domain([-1, color.range().length - 1])
+          .rangeRound([height - marginBottom, marginTop]);
+
+      svg.append("g")
+        .selectAll("rect")
+        .data(color.range())
+        .join("rect")
+          .attr("y", (d, i) => x(i))
+          .attr("x", offsetLeft + marginLeft)
+          .attr("height", (d, i) => x(i - 1) - x(i))
+          .attr("width", width - marginRight - marginLeft)
+          .attr("fill", d => d);
+
+      tickValues = d3.range(thresholds.length);
+      tickFormat = i => thresholdFormat(thresholds[i], i);
+    }
+
+    // Ordinal
+    else {
+      x = d3.scaleBand()
+          .domain(color.domain())
+          .rangeRound([height - marginBottom, marginTop]);
+
+      svg.append("g")
+        .selectAll("rect")
+        .data(color.domain())
+        .join("rect")
+          .attr("y", x)
+          .attr("x", offsetLeft + marginLeft)
+          .attr("height", Math.max(0, x.bandwidth() - 1))
+          .attr("width", width - marginLeft - marginRight)
+          .attr("fill", color);
+
+      tickAdjust = () => {};
+    }
+
+    svg.append("g")
+        .attr("transform", `translate(${offsetLeft + width - marginRight},${offsetTop})`)
+        .call(d3.axisRight(x)
+          .ticks(ticks, typeof tickFormat === "string" ? tickFormat : undefined)
+          .tickFormat(typeof tickFormat === "function" ? tickFormat : undefined)
+          .tickSize(tickSize)
+          .tickValues(tickValues))
+        .call(tickAdjust)
+        .call(g => g.select(".domain").remove())
+        .call(g => g.append("text")
+          .attr("x", marginLeft - width + marginRight)
+          .attr("y", 0)
+          .attr("fill", "currentColor")
+          .attr("text-anchor", "start")
+          .attr("font-weight", "bold")
+          .attr("class", "title")
+          .attr("font-family", "sans-serif")
+          .attr("font-size", "14px")
+          .attr("font-weight", "bold")
+          .text(title));
+
+    return svg.node();
+  }
+
 
   // Only export these functions
   return {
