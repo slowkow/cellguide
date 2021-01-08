@@ -117,8 +117,8 @@ var mybrowser = function() {
 
       <div id="display-meta" style="display:block;">
         <div id="meta-row" class="row">
-          <div id="mydiv-meta-plot" class="col-6"></div>
-          <div id="meta-boxplot" class="col-6"></div>
+          <div id="mydiv-meta-plot" class="col-7"></div>
+          <div id="meta-boxplot" class="col-5"></div>
         </div>
         <div id="mycontrols" class="row mb-4">
         </div>
@@ -194,16 +194,17 @@ var mybrowser = function() {
       // _dump(metaColors)
 
       function doDrawMetaHex() {
+        // TODO The xy coordinates in this function need a total rewrite.
         var radius = 1
-        var legend_width = 210
+        var legend_width = 280
         const canvas_scale = 2
-        var plot_width = 460 * canvas_scale
+        var plot_width = 520 * canvas_scale
         var plot_height = 460 * canvas_scale
         var legend_margin = {
           top: 40, right: 0, bottom: 0, left: 5
         }
         var margin = {
-          top: 45, right: 10, bottom: 10, left: 10
+          top: 45, right: 90, bottom: 10, left: 10
         }
 
         d3.select("#mydiv-meta-plot").html("")
@@ -253,7 +254,7 @@ var mybrowser = function() {
         let panelBorder = svg.append("rect")
           .attr("x", margin.left - 10)
           .attr("y", margin.top - 10)
-          .attr("width", plot_width / canvas_scale)
+          .attr("width", plot_width / canvas_scale - margin.right / canvas_scale)
           .attr("height", plot_height / canvas_scale - margin.top + margin.bottom)
           .style("stroke", "black")
           .style("fill", "none")
@@ -261,7 +262,7 @@ var mybrowser = function() {
 
         var x = d3.scaleLinear()
           .domain(d3.extent(g_mydata, d => d.x))
-          .range([margin.left, plot_width - margin.right])
+          .range([margin.left, plot_width + margin.right])
 
         var y = d3.scaleLinear()
           .domain(d3.extent(g_mydata, d => d.y))
@@ -320,16 +321,17 @@ var mybrowser = function() {
           });
 
           var ordinal = d3.scaleOrdinal()
-            .domain(meta_valcounts.map(d => d[0]))
+            // .domain(meta_valcounts.map(d => d[0]))
+            .domain(meta_valcounts.map(d => `${d[0]} (n = ${d3.format(",d")(d[1])})`))
             .range(meta_valcounts.map(d => metaColors[d[0]]))
-            // .domain(Object.keys(metaColors).slice().sort())
-            // .range(Object.values(metaColors).reverse())
+
+          // meta_valcounts.map(d => [`${d[0]} (n = ${d3.format(",d")(d[1])})`, d[1]])
 
           svg.append("g")
             .attr("class", "legendOrdinal")
             .attr("transform",
               `translate(
-                ${plot_width / canvas_scale + legend_margin.left},
+                ${plot_width / canvas_scale - margin.right / canvas_scale + legend_margin.left},
                 ${legend_margin.top})`
             )
 
@@ -451,7 +453,7 @@ var mybrowser = function() {
             svg: svg,
             color: color,
             title: metaInfo.label,
-            offsetLeft: plot_width / canvas_scale + legend_margin.left,
+            offsetLeft: plot_width / canvas_scale - margin.right / canvas_scale + legend_margin.left,
             offsetTop: legend_margin.top
           })
 
@@ -497,14 +499,26 @@ var mybrowser = function() {
 
         let cluster_label_size = "0.75em"
 
+        var x2 = d3.scaleLinear()
+          .domain(d3.extent(g_mydata, d => d.x))
+          .range([margin.left * 10, plot_width])
+
+        var y2 = d3.scaleLinear()
+          .domain(d3.extent(g_mydata, d => d.y))
+          .rangeRound([plot_height - margin.bottom, margin.top * canvas_scale])
+
+        function x_cl(d) {
+          return (x2(d.value[0]) - margin.right) / canvas_scale
+        }
+
         svg.selectAll("g.cluster_label")
           .data(clusterLabels)
           .enter()
           .append("g")
           .append("text")
           .attr("class","cluster_label")
-          .attr("x", d => x(d.value[0]) / canvas_scale)
-          .attr("y", d => y(d.value[1]) / canvas_scale)
+          .attr("x", x_cl)
+          .attr("y", d => y2(d.value[1]) / canvas_scale)
           .attr("text-anchor", "middle")
           .attr("font-family", "sans-serif")
           .attr("font-size", cluster_label_size)
@@ -522,8 +536,8 @@ var mybrowser = function() {
           .append("g")
           .append("text")
           .attr("class","cluster_label")
-          .attr("x", d => x(d.value[0]) / canvas_scale)
-          .attr("y", d => y(d.value[1]) / canvas_scale)
+          .attr("x", x_cl)
+          .attr("y", d => y2(d.value[1]) / canvas_scale)
           .attr("text-anchor", "middle")
           .attr("font-family", "sans-serif")
           .attr("font-size", cluster_label_size)
@@ -1638,10 +1652,10 @@ var mybrowser = function() {
       // vertical lines
       const vLines = svg.append("g")
         .selectAll("g")
-        .data([0.001, 0.01, 0.1])
+        .data([0.001, 0.01, 0.1, 1.0])
         .join("g")
       vLines.append("path")
-        .attr("stroke", "#ddd")
+        .attr("stroke", "#eee")
         .attr("stroke-width", "1px")
         .attr("d", d => `M${x(d)},${margin.top} V${height - margin.bottom}`);
       // let vLines = svg.append("g")
