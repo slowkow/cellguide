@@ -10,3 +10,15 @@
     margin-top: 20px;
     height: 435px;
 }
+
+#generif {
+    border: 1px solid gainsboro;
+    max-height: 200px;
+    overflow: auto;
+}
+
+#pubmed-abstracts {
+    border: 1px solid gainsboro;
+    max-height: 200px;
+    overflow: auto;
+}
