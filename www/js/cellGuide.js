@@ -3557,6 +3557,15 @@ var mybrowser = function() {
     return svg.node();
   }
 
+	// Gene information
+
+	function getGeneInfo(gene) {
+    mygene_query(gene, function(data) {
+      var id = data.hits[0]._id;
+      mygene_gene(id, fill_geneinfo);
+    });
+  }
+
 	function search_pubmed(query) {
 		var url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?";
 		$.get(url, {
