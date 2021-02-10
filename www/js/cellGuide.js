@@ -81,17 +81,6 @@ var mybrowser = function() {
     meta: "none"
   }
 
-  // +-- container ------------------------------+
-  // | +-- mydiv ------------------------------+ |
-  // | | +-- mydiv-meta --+ +-- mydiv-gene --+ | |
-  // | | |                | |                | | |
-  // | | +----------------+ +----------------+ | |
-  // | +---------------------------------------+ |
-  // | +-- mytable ----------------------------+ |
-  // | |                                       | |
-  // | +---------------------------------------+ |
-  // +-------------------------------------------+
-
   $("body").html(
     `
     <div class="container">
@@ -116,7 +105,7 @@ var mybrowser = function() {
       <hr>
 
       <div id="display-meta" style="display:block;">
-        <div id="meta-row" class="row">
+        <div id="meta-row" class="row" style="min-height:500px;">
           <div id="mydiv-meta-plot" class="col-7"></div>
           <div id="meta-boxplot" class="col-5"></div>
         </div>
@@ -133,14 +122,15 @@ var mybrowser = function() {
         </div>
       </div>
 
-      <div id="display-gene" style="display:block;height:500px;">
+      <!-- <div id="display-gene" style="display:block;height:500px;"> -->
+      <div id="display-gene" style="display:block;">
           <h3>Gene expression</h3>
         <div class="row">
           <div id="gene-loading-spinner" class="col-2 offset-5">
             <div class="loader"></div>
           </div>
           <div id="mydiv-gene" class="col-6"></div>
-          <div id="gene-bars" class="col-3" style="min-height:450px;"></div>
+          <div id="gene-bars" class="col-2" style="min-height:450px;"></div>
           <div id="gene-boxplot" class="col-3"></div>
         </div>
       </div>
@@ -161,13 +151,6 @@ var mybrowser = function() {
   )
 
   var renderer = function() {
-
-    // Use vega to draw a heatmap
-    function drawGene(geneSym) {
-      console.log("vega drawGene()");
-      console.log(vlSpec);
-      vegaEmbed("#mydiv", vlSpec);
-    }
 
     function drawMetaHex(fieldName) {
       console.log("d3 canvas drawMetaHex()");
@@ -653,7 +636,7 @@ var mybrowser = function() {
 
       let xAxis = g => g
         .attr("transform", `translate(0,${height - margin.bottom})`)
-        .call(d3.axisBottom(x).tickSizeOuter(0).ticks(1, "~p"))
+        .call(d3.axisBottom(x).tickSizeOuter(0).ticks(2, "~p"))
         .call(g => g.select(".domain").remove())
         .call(g => g.selectAll(".tick text").attr("font-size", "14px"))
         // .call(
@@ -801,7 +784,7 @@ var mybrowser = function() {
 
       let xAxis = g => g
         .attr("transform", `translate(0,${height - margin.bottom})`)
-        .call(d3.axisBottom(x).tickSizeOuter(0).ticks(1, "~p"))
+        .call(d3.axisBottom(x).tickSizeOuter(0).ticks(2, "~p"))
         .call(g => g.select(".domain").remove())
         .call(g => g.selectAll(".tick text").attr("font-size", "14px"))
 
@@ -886,7 +869,7 @@ var mybrowser = function() {
         let groupKey = db.conf.clusterField
         let groups = get_groups(groupKey)
 
-        // let subgroupKey = "health"
+        // let subgroupKey = "case"
         // let subgroupLevels = ["Non-inflamed","Inflamed","Healthy"]
         let subgroupKey = metaInfo.name
         let subgroupLevels = metaInfo.valCounts.map(d => d[0])
@@ -1106,188 +1089,6 @@ var mybrowser = function() {
 
       }
 
-    function drawGene3(geneSym) {
-      g_count++;
-      console.log("d3 canvas drawGene() " + g_count);
-
-      let data = g_mydata
-
-      let canvas_scale = 2
-      let radius = 1
-      let legend_width = 180
-      let plot_width = 360 * canvas_scale
-      let plot_height = 360 * canvas_scale
-      let legend_margin = {
-        top: 65, right: 0, bottom: 0, left: 10
-      }
-      let margin = {
-        top: 45, right: 10, bottom: 10, left: 10
-      }
-
-      d3.select("#gene-loading-spinner").remove()
-      d3.select("#mydiv-gene-plot").remove()
-      const container = d3.select("#mydiv-gene").append("div")
-        .attr("id", "mydiv-gene-plot")
-        .style("position", "relative")
-        .style("display", "inline-block")
-
-      const canvas = container.append('canvas')
-        .attr("id", "mycanvas-gene-plot")
-        .node()
-      canvas.width = plot_width + legend_width * canvas_scale
-      canvas.height = plot_height
-
-      // var canvas = document.createElement('canvas')
-      // canvas.id     = "mycanvas-gene-plot"
-      // canvas.width  = plot_width * 2 + legend_width
-      // canvas.height = plot_height * 2
-      // canvas.style.width = plot_width
-      // document.getElementById("mydiv-gene-plot").appendChild(canvas)
-
-      const context = canvas.getContext('2d')
-
-      const svg = container.append('svg')
-        .attr("width", canvas.width / canvas_scale)
-        .attr("height", canvas.height / canvas_scale)
-        .style("position", "absolute")
-        .style("top", '0px')
-        .style("left", '0px');
-
-      svg.append("text")
-        .attr("x", margin.left)
-        .attr("y", margin.top - 15)
-        .attr("font-family", "sans-serif")
-        .attr("font-size", "32px")
-        .attr("font-style", "italic")
-        .text(geneSym)
-
-      var n_cells = data.filter(d => d.gene > 0).length
-      svg.append("text")
-        .attr("x", margin.left / 2)
-        .attr("y", plot_height / canvas_scale - margin.bottom / 2)
-        .attr("font-family", "sans-serif")
-        .attr("font-size", "12px")
-        .text(`${d3.format(",")(n_cells)} (${d3.format(".1%")(n_cells / data.length)}) cells`)
-
-      let panelBorder = svg.append("rect")
-        .attr("x", margin.left - 10)
-        .attr("y", margin.top - 10)
-        .attr("width", plot_width / canvas_scale)
-        .attr("height", plot_height / canvas_scale - margin.top + margin.bottom)
-        .style("stroke", "black")
-        .style("fill", "none")
-        .style("stroke-width", "1px");
-
-      var x = d3.scaleLinear()
-        .domain(d3.extent(data, d => d.x))
-        .range([margin.left, plot_width - margin.right])
-
-      var y = d3.scaleLinear()
-        .domain(d3.extent(data, d => d.y))
-        .rangeRound([plot_height - margin.bottom, margin.top])
-
-      var hexbin = d3.hexbin()
-        .x(d => x(d.x))
-        .y(d => y(d.y))
-        .radius(radius * (plot_width - legend_width) / (plot_height))
-        .extent([
-          [margin.left, margin.top],
-          [plot_width - margin.right, plot_height - margin.bottom]
-        ])
-
-      var bins = hexbin(data)
-
-      // Number of points in the bin (works)
-      // var color = d3.scaleSequential(d3.interpolateBuPu)
-      //   .domain([0, d3.max(bins, bin => bin.length) / 2])
-      
-      // Sequential scale (works)
-      var bin_max = d3.max(bins, bin => d3.mean(bin, d => d.gene))
-      var color = d3.scaleSequential(d3.interpolateBuPu)
-        .domain([0, bin_max])
-      // var color_range = linspace(color.domain()[0], color.domain()[1], 10)
-      var color_range = linspace(0, bin_max, 10)
-
-      // // Sequential scale (works)
-      // const color_range_max = d3.max(bins, bin => d3.mean(bin, d => d.gene))
-      // let color_range = linspace(0, color_range_max, 10)
-      // // let color_range = linspace(0, 1, 10)
-      // var color = d3.scaleLinear()
-      //   .domain([0, d3.max(bins, bin => d3.mean(bin, d => d.gene))])
-      //   .range(color_range.map(d => d3.interpolateBuPu(d)))
-
-//      // Quantile scale (works)
-//      //var color_range = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-//      let color_range = linspace(0, 1, 10)
-//      // g_bins = bins
-//      // Need to filter out the zeros because genes are sparse
-//      let my_domain = bins
-//        .map(bin => d3.mean(bin, d => d.gene))
-//        .filter(d => d > 0)
-//      var color = d3.scaleQuantile()
-//        .domain(my_domain)
-//        .range(color_range.map(d => d3.interpolateBuPu(d)))
-
-      context.fillStyle = "#fff";
-
-      // context.strokeStyle = "black";
-      // context.strokeRect(0, margin.top - 10, plot_width, plot_height - margin.top + margin.bottom);
-
-      var hex = new Path2D(hexbin.hexagon());
-
-      bins.forEach(function(bin){
-        context.translate(bin.x, bin.y);
-        //context.fillStyle = color(bin.length);
-        context.fillStyle = color(d3.mean(bin, d => d.gene))
-        context.fill(hex)
-        context.strokeStyle = context.fillStyle
-        context.lineWidth = 0
-        context.stroke(hex)
-        context.setTransform(1, 0, 0, 1, 0, 0)
-      });
-
-      svg.append("text")
-        .attr("x", plot_width / canvas_scale + legend_margin.left)
-        .attr("y", legend_margin.top - 20)
-        .attr("font-family", "sans-serif")
-        .attr("font-size", "1em")
-        .attr("font-weight", "bold")
-        .text("log2CP10K")
-
-      var legend = svg.selectAll("g.legend_colorbar")
-        // .data(color.range().reverse())
-        .data(color_range.reverse())
-        .enter()
-        .append("g")
-        .attr("class","legend_colorbar");
-
-      let legend_rect_height = 25
-
-      legend
-        .append('rect')
-        .attr("x", plot_width / canvas_scale + legend_margin.left)
-        .attr("y", function(d, i) {
-           return legend_margin.top + i * legend_rect_height;
-        })
-       .attr("width", 15)
-       .attr("height", legend_rect_height)
-       // .style("stroke", "black")
-       // .style("stroke-width", 0.1)
-       .style("fill", function(d){return color(d);});
-
-      legend
-        .append('text')
-        .attr("x", plot_width / canvas_scale + legend_margin.left + 20)
-        .attr("y", function(d, i) {
-         return legend_margin.top + i * legend_rect_height;
-        })
-        .attr("alignment-baseline", "middle")
-        .style("font-size", "14px")
-        .text(function(d, i) {
-          var format = d3.format(".1f");
-          return `${format(+color_range[i])}`
-        })
-    }
 
     function drawGene4(geneSym, gene_groupby) {
       //
@@ -1315,10 +1116,10 @@ var mybrowser = function() {
       let plot_height = 360 * canvas_scale
       //
       let legend_margin = {
-        top: 65, right: 0, bottom: 0, left: 5
+        top: 55, right: 0, bottom: 0, left: 5
       }
       let margin = {
-        top: 65, right: 10, bottom: 10, left: 10
+        top: 55, right: 10, bottom: 10, left: 10
       }
       //
       d3.select("#gene-loading-spinner").remove()
@@ -1330,7 +1131,7 @@ var mybrowser = function() {
       //
       const plot_total = subgroupKey ? subgroupLevels.length : 1
       if (plot_total === 1) {
-        margin.top = 45
+        margin.top = 35
       }
       var plot_col_width = 12
       var font_size = 14
@@ -1575,16 +1376,24 @@ var mybrowser = function() {
       let group_names = groups.map(d => d[0])
       var el = $("#meta-boxplot")
       el.html("")
+      const longest_subgroup_key = d3.greatest(
+        subgroupLevels, (a, b) => d3.ascending(a.length, b.length)
+      )
       const longest_group_key = d3.greatest(
         group_names, (a, b) => d3.ascending(a.length, b.length)
       )
       const margin = {
-        top: 15, right: 165, bottom: 20,
+        top: 15,
+        right: getTextWidth(longest_subgroup_key, "15px arial") + 80,
+        bottom: 20,
         left: getTextWidth(longest_group_key, "15px arial") + 9
       }
       const width = el.outerWidth()
-      const height = Math.max(16 * groups.length, el.outerHeight())
-      d3.select("#meta-row").style("height", `${height + margin.top + margin.bottom}px`)
+      // const height = Math.max(2 * groups.length, el.outerHeight())
+      const height = Math.min(12 * groups.length * subgroupLevels.length, el.outerHeight())
+      if (height > el.outerHeight()) {
+        d3.select("#meta-row").style("height", `${height + margin.top + margin.bottom}px`)
+      }
       //
       const svg = d3.select("#meta-boxplot").append('svg')
         .attr("width", width)
@@ -1655,8 +1464,9 @@ var mybrowser = function() {
         .data([0.001, 0.01, 0.1, 1.0])
         .join("g")
       vLines.append("path")
-        .attr("stroke", "#eee")
-        .attr("stroke-width", "1px")
+        // .attr("stroke", "#eee")
+        .attr("stroke", "#fff")
+        .attr("stroke-width", "2px")
         .attr("d", d => `M${x(d)},${margin.top} V${height - margin.bottom}`);
       // let vLines = svg.append("g")
       //   .style("stroke", "#000")
@@ -2000,6 +1810,9 @@ var mybrowser = function() {
       let subgroupCounts = Object.fromEntries(d3.rollup(
         data, v => [...new Set(v.map(d => d[aggKey]))].length, d => d[fillKey]
       ))
+      const longest_group_key = d3.greatest(
+        Object.keys(subgroupCounts), (a, b) => d3.ascending(a.length, b.length)
+      )
       var make_bin = function(d) {
         // d.sort((a, b) => a.gene - b.gene)
         // const values = d.map(d => d.gene).filter(x => x > 0).sort()
@@ -2007,7 +1820,7 @@ var mybrowser = function() {
         var values = Object.values(Object.fromEntries(d3.rollup(
           d, v => d3.mean(v.map(v => v.gene)), d => d[aggKey]
         ))).sort((a,b) => a - b)
-        if (values.length > 5) {
+        if (values.length > 2) {
           const min = values[0]
           const max = values[values.length - 1]
           const q1 = d3.quantile(values, 0.25)
@@ -2061,14 +1874,20 @@ var mybrowser = function() {
       const width = el.outerWidth() * 1.15
       // const height = Math.max(6 * groups.length * subgroupLevels.length, el.outerHeight())
       const height = Math.min(10 * groups.length * subgroupLevels.length, el.outerHeight())
-      const margin = {top: 15, right: 165, bottom: 20, left: 10}
+      const margin = {
+        top: 15,
+        right: getTextWidth(longest_group_key, "14px arial") + 80,
+        // right: 165,
+        bottom: 20,
+        left: 10
+      }
       //
       const svg = d3.select("#gene-boxplot").append('svg')
         .attr("width", width)
         .attr("height", height)
         .style("position", "absolute")
         .style("top", '0px')
-        .style("left", '-45px');
+        .style("left", '-25px')
       //
       var y0 = d3.scaleBand()
         .domain(group_names)
@@ -2239,7 +2058,7 @@ var mybrowser = function() {
         var values = Object.values(Object.fromEntries(d3.rollup(
           d, v => d3.mean(v.map(v => v.gene)), d => d[aggKey]
         ))).sort((a,b) => a - b)
-        if (values.length > 5) {
+        if (values.length > 2) {
           const min = values[0]
           const max = values[values.length - 1]
           const q1 = d3.quantile(values, 0.25)
@@ -2295,7 +2114,7 @@ var mybrowser = function() {
         .attr("height", height)
         .style("position", "absolute")
         .style("top", '0px')
-        .style("left", '-45px');
+        .style("left", '-25px');
       //
       var y0 = d3.scaleBand()
         .domain(group_names)
@@ -2423,92 +2242,6 @@ var mybrowser = function() {
     }
 
     // Use d3 to draw a binhex plot
-    function drawGene2(geneSym) {
-      console.log("d3 drawGene()");
-
-      var radius = 2
-      var width = 800
-      var height = 600
-      var margin = ({top: 20, right: 20, bottom: 30, left: 40})
-
-      var x = d3.scaleLinear()
-        .domain(d3.extent(g_mydata, d => d.x))
-        .range([margin.left, width - margin.right])
-
-      var y = d3.scaleLinear()
-        .domain(d3.extent(g_mydata, d => d.y))
-        .rangeRound([height - margin.bottom, margin.top])
-
-      hexbin = d3.hexbin()
-        .x(d => x(d.x))
-        .y(d => y(d.y))
-        .radius(radius * width / height)
-        .extent([[margin.left, margin.top], [width - margin.right, height - margin.bottom]])
-
-      bins = hexbin(g_mydata)
-
-      // var color = d3.scaleSequential(d3.interpolateBuPu)
-      //   .domain([0, d3.max(bins, d => d.length) / 2])
-
-      var color = d3.scaleSequential(d3.interpolateBuPu)
-        .domain([0, d3.max(bins, bin => d3.mean(bin, d => d.gene))])
-
-      const svg = d3.select("#mydiv").append("svg")
-          .attr("viewBox", [0, 0, width * 3, height * 3]);
-
-      // var xAxis = g => g
-      //   .attr("transform", `translate(0,${height - margin.bottom})`)
-      //   .call(d3.axisBottom(x).ticks(width / 80, ""))
-      //   .call(g => g.select(".domain").remove())
-      //   .call(g => g.append("text")
-      //       .attr("x", width - margin.right)
-      //       .attr("y", -4)
-      //       .attr("fill", "currentColor")
-      //       .attr("font-weight", "bold")
-      //       .attr("text-anchor", "end")
-      //       .text(g_mydata.x))
-      // svg.append("g")
-      //     .call(xAxis);
-
-      // var yAxis = g => g
-      //   .attr("transform", `translate(${margin.left},0)`)
-      //   .call(d3.axisLeft(y).ticks(null, ".1s"))
-      //   .call(g => g.select(".domain").remove())
-      //   .call(g => g.append("text")
-      //       .attr("x", 4)
-      //       .attr("y", margin.top)
-      //       .attr("dy", ".71em")
-      //       .attr("fill", "currentColor")
-      //       .attr("font-weight", "bold")
-      //       .attr("text-anchor", "start")
-      //       .text(g_mydata.y))
-      // svg.append("g")
-      //     .call(yAxis);
-
-      svg.append("g")
-          // .attr("stroke", "#000")
-          // .attr("stroke-opacity", 0.1)
-        .selectAll("path")
-        .data(bins)
-        .join("path")
-          .attr("d", hexbin.hexagon())
-          .attr("transform", d => `translate(${d.x},${d.y})`)
-          //.attr("fill", d => color(d.length));
-          .attr("fill", bin => color(d3.mean(bin, d => d.gene)));
-
-      //svg.append("g")
-      //    // .attr("stroke", "#000")
-      //    // .attr("stroke-opacity", 0.1)
-      //  .selectAll("path")
-      //  .data(bins)
-      //  .join("path")
-      //    .attr("d", hexbin.hexagon())
-      //    .attr("transform", d => `translate(${d.x},${d.y})`)
-      //    .attr("fill", d => color(d.length));
-
-      //d3.select("#mydiv").append(svg)
-    }
-
     return {
       "drawGene": drawGene4,
       "drawMetaHex": drawMetaHex,
@@ -3015,7 +2748,7 @@ var mybrowser = function() {
     div_groupby = div_groupby.join("")
 
     // Gene expression controls
-    htmls.push(`<div class="mb-4">
+    htmls.push(`<div class="my-4">
       <div class="row">
         <div class="col-5">
           <label for="gene-search">Gene</label>
