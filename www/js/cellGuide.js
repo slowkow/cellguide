@@ -3183,8 +3183,8 @@ var mybrowser = function() {
       }
     })
     $(`#${divId}`).addClass("table-striped")
-    // $(".tpLoadGeneLink").unbind("click")
-    // $(".tpLoadGeneLink").on("click", onMarkerGeneClick);
+    $("#meta-colorby").unbind("change")
+    $("#meta-colorby").on("change", on_meta_colorby);
   }
 
   function loadMarkersFromTsv(papaResults, url, divId, clusterName, clusterIndex) {
