@@ -3174,7 +3174,9 @@ var mybrowser = function() {
       height: 500,
       data: data,
       // layout: "fitDataFill",
-      layout: "fitColumns",
+      // layout: "fitColumns",
+      columnMaxWidth: 190,
+      movableColumns: true,
       columns: columns,
       resizableColumns: false,
       renderComplete: function() {
