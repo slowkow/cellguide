@@ -22,3 +22,8 @@
     max-height: 200px;
     overflow: auto;
 }
+
+#cluster-table-0 .tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-title{
+    white-space: normal;
+    overflow-wrap: break-word;
+}
