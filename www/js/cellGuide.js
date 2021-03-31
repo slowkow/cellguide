@@ -3138,6 +3138,9 @@ var mybrowser = function() {
         el.click(onMarkerGeneClick)
       })
     }
+    const pval_labels = [
+      'P_value', 'pval', 'pvalue', 'P.Value', 'adj.P.Val' 'p_val', 'pVal', 'Chisq_P'
+    ]
     for (var col = 1; col < headerRow.length; col++) {
       var coldata = headerRow[col].split("|")
       var d = {
@@ -3146,11 +3149,12 @@ var mybrowser = function() {
       }
       if (coldata[0] === "symbol") {
         d["formatter"] = format_gene
+        d["headerFilter"] = true
       }
       if (coldata[1] === "float") {
         d["headerFilter"] = true
         d["headerFilterFunc"] = ">="
-        if (coldata[0] == "pct_out") {
+        if (coldata[0] == "pct_out" || pval_labels.indexOf(coldata[0]) =! -1) {
           d["headerFilterFunc"] = "<="
         }
       }
