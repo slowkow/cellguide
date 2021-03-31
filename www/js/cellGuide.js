@@ -3131,7 +3131,12 @@ var mybrowser = function() {
     var headerRow = rows[0];
     var columns = []
     var format_gene = function(cell, params, onRendered) {
-      return `<i><a data-gene="${cell.getValue()}" class='text-primary tpLoadGeneLink' style="cursor: pointer;">${cell.getValue()}</a></i>`
+      // return `<i><a data-gene="${cell.getValue()}" class='text-primary tpLoadGeneLink' style="cursor: pointer;">${cell.getValue()}</a></i>`
+      onRendered(function(){
+        var el = $(cell.getElement())
+        el.html(`<i><a data-gene="${cell.getValue()}" class='text-primary tpLoadGeneLink' style="cursor: pointer;">${cell.getValue()}</a></i>`)
+        el.click(onMarkerGeneClick)
+      })
     }
     for (var col = 1; col < headerRow.length; col++) {
       var coldata = headerRow[col].split("|")
@@ -3179,162 +3184,163 @@ var mybrowser = function() {
       movableColumns: true,
       columns: columns,
       resizableColumns: false,
-      renderComplete: function() {
-        $(".tpLoadGeneLink").unbind("click")
-        $(".tpLoadGeneLink").on("click", onMarkerGeneClick);
-      }
+      // renderComplete: function() {
+      //   $(".tpLoadGeneLink").unbind("click")
+      //   $(".tpLoadGeneLink").on("click", onMarkerGeneClick);
+      // }
     })
     $(`#${divId}`).addClass("table-striped")
     $("#meta-colorby").unbind("change")
     $("#meta-colorby").on("change", on_meta_colorby);
   }
 
-  function loadMarkersFromTsv(papaResults, url, divId, clusterName, clusterIndex) {
-    /* construct a table from a marker tsv file and write as html to the DIV with divID */
-    console.log("got coordinate TSV rows, parsing...");
-    var rows = papaResults.data;
-
-    var headerRow = rows[0];
-
-    var htmls = [];
-
-    var markerListIdx = parseInt(divId.split("-")[1]);
-    var selectOnClick = db.conf.markers[markerListIdx].selectOnClick;
-
-    htmls.push(`<table class='table' id='tpMarkerTable-${clusterIndex}'>`);
-    htmls.push("<thead>");
-    var hprdCol = null;
-    var geneListCol = null;
-    var exprCol = null;
-    var pValCol = null
-    var pval_labels = [
-      'P_value', 'p_val', 'pVal', 'Chisq_P', 'auc'
-    ]
-    //var doDescSort = false;
-    for (var i = 1; i < headerRow.length; i++) {
-      var colLabel = headerRow[i];
-      var isNumber = false;
-
-      if (colLabel.indexOf('|') > -1) {
-        var parts = colLabel.split("|");
-        colLabel = parts[0];
-        var colType = parts[1];
-        if (colType==="int" || colType==="float")
-          isNumber = true;
-      }
-
-      var i_pval = pval_labels.indexOf(colLabel)
-
-      var width = null;
-      if (colLabel==="_geneLists") {
-        colLabel = "Gene Lists";
-        geneListCol = i;
-      }
-      else if (i_pval != -1) {
-        // colLabel = "P-value"
-        colLabel = pval_labels[i_pval]
-        pValCol = i
-        isNumber = true
-        //if (i===2)
-          //doDescSort = true;
-      }
-      
-      else if (colLabel==="_expr") {
-        colLabel = "Expression";
-        exprCol = i;
-      }
-      else if (colLabel==="_hprdClass") {
-        hprdCol = i;
-        colLabel = "Protein Class (HPRD)";
-        width = "200px";
-      }
-
-      var addStr = "";
-      if (isNumber)
-        addStr = " data-sort-method='number'";
-
-      if (width===null) {
-        htmls.push(`<th ${addStr} style="position:sticky; top:0; border-top:0; background-color: #f0f0f0;">`);
-      } else {
-        htmls.push(`<th ${addStr} style="width:${width}; position:sticky; top:0; border-top:0; background-color: #f0f0f0;">`);
-      }
-      colLabel = colLabel.replace(/_/g, " ");
-      htmls.push(colLabel);
-      htmls.push("</th>");
-    }
-    htmls.push("</thead>");
-
-    // var hubUrl = makeHubUrl();
-    var hubUrl = null;
-
-    var n_rows = Math.min(2000, rows.length)
-    htmls.push("<tbody>");
-    for (let i = 1; i < n_rows; i++) {
-      var row = rows[i];
-      if ((row.length===1) && row[0]==="") // papaparse sometimes adds empty lines to files
-        continue;
-
-      htmls.push("<tr>");
-      var geneId = row[0];
-      var geneSym = row[1];
-      htmls.push(`<td><i><a data-gene="${geneSym}" class='text-primary tpLoadGeneLink' style="cursor: pointer;">${geneSym}</a></i>`);
-      if (hubUrl!==null) {
-        var fullHubUrl = hubUrl+"&position="+geneSym+"&singleSearch=knownCanonical";
-        htmls.push("<a target=_blank class='link' style='margin-left: 10px; font-size:80%; color:#AAA' title='link to UCSC Genome Browser' href='"+fullHubUrl+"'>Genome</a>");
-      }
-      htmls.push("</td>");
-
-      for (var j = 2; j < row.length; j++) {
-        var val = row[j];
-        htmls.push("<td>");
-        // added for the autism dataset, allows to add mouse overs with images
-        // field has to start with ./
-        if (val.startsWith("./")) {
-          var imgUrl = val.replace("./", db.url+"/");
-          var imgHtml = '<img width="100px" src="'+imgUrl+'">';
-          val = "<a data-toggle='tooltip' data-placement='auto' class='tpPlots link' target=_blank title='"+imgHtml+"' href='"+ imgUrl + "'>plot</a>";
-        }
-        if (j===geneListCol || j===exprCol) {
-          geneListFormat(htmls, val, geneSym);
-        } else if (j===pValCol) {
-          // htmls.push(parseFloat(val).toPrecision(5)); // five digits ought to be enough for everyone
-          htmls.push(parseFloat(val).toPrecision(3))
-          // htmls.push(+val);
-        } else {
-          // htmls.push(+val);
-          htmls.push(parseFloat(val).toPrecision(3))
-        }
-        htmls.push("</td>");
-      }
-      htmls.push("</tr>");
-    }
-
-    htmls.push("</tbody>");
-    htmls.push("</table>");
-
-
-    $("#"+divId).html(htmls.join(""));
-    var sortOpt = {};
-    //if (doDescSort)
-      //sortOpt.descending=true;
-    new Tablesort(document.getElementById(`tpMarkerTable-${clusterIndex}`));
-    $(".tpLoadGeneLink").unbind("click")
-    $(".tpLoadGeneLink").on("click", onMarkerGeneClick);
-    // activateTooltip(".link");
-    //
-    // $(".nav-metadata").unbind("click")
-    // $(".nav-metadata").on("click", onMetaClick);
-    $("#meta-colorby").unbind("change")
-    $("#meta-colorby").on("change", on_meta_colorby);
-
-    var ttOpt = {"html": true, "animation": false, "delay":{"show":100, "hide":100} };
-    // $(".tpPlots").bsTooltip(ttOpt);
-  }
+//  function loadMarkersFromTsv(papaResults, url, divId, clusterName, clusterIndex) {
+//    /* construct a table from a marker tsv file and write as html to the DIV with divID */
+//    console.log("got coordinate TSV rows, parsing...");
+//    var rows = papaResults.data;
+//    var headerRow = rows[0];
+//
+//    var htmls = [];
+//
+//    var markerListIdx = parseInt(divId.split("-")[1]);
+//    var selectOnClick = db.conf.markers[markerListIdx].selectOnClick;
+//
+//    htmls.push(`<table class='table' id='tpMarkerTable-${clusterIndex}'>`);
+//    htmls.push("<thead>");
+//    var hprdCol = null;
+//    var geneListCol = null;
+//    var exprCol = null;
+//    var pValCol = null
+//    var pval_labels = [
+//      'P_value', 'p_val', 'pVal', 'Chisq_P', 'auc'
+//    ]
+//    //var doDescSort = false;
+//    for (var i = 1; i < headerRow.length; i++) {
+//      var colLabel = headerRow[i];
+//      var isNumber = false;
+//
+//      if (colLabel.indexOf('|') > -1) {
+//        var parts = colLabel.split("|");
+//        colLabel = parts[0];
+//        var colType = parts[1];
+//        if (colType==="int" || colType==="float")
+//          isNumber = true;
+//      }
+//
+//      var i_pval = pval_labels.indexOf(colLabel)
+//
+//      var width = null;
+//      if (colLabel==="_geneLists") {
+//        colLabel = "Gene Lists";
+//        geneListCol = i;
+//      }
+//      else if (i_pval != -1) {
+//        // colLabel = "P-value"
+//        colLabel = pval_labels[i_pval]
+//        pValCol = i
+//        isNumber = true
+//        //if (i===2)
+//          //doDescSort = true;
+//      }
+//      
+//      else if (colLabel==="_expr") {
+//        colLabel = "Expression";
+//        exprCol = i;
+//      }
+//      else if (colLabel==="_hprdClass") {
+//        hprdCol = i;
+//        colLabel = "Protein Class (HPRD)";
+//        width = "200px";
+//      }
+//
+//      var addStr = "";
+//      if (isNumber)
+//        addStr = " data-sort-method='number'";
+//
+//      if (width===null) {
+//        htmls.push(`<th ${addStr} style="position:sticky; top:0; border-top:0; background-color: #f0f0f0;">`);
+//      } else {
+//        htmls.push(`<th ${addStr} style="width:${width}; position:sticky; top:0; border-top:0; background-color: #f0f0f0;">`);
+//      }
+//      colLabel = colLabel.replace(/_/g, " ");
+//      htmls.push(colLabel);
+//      htmls.push("</th>");
+//    }
+//    htmls.push("</thead>");
+//
+//    // var hubUrl = makeHubUrl();
+//    var hubUrl = null;
+//
+//    var n_rows = Math.min(2000, rows.length)
+//    htmls.push("<tbody>");
+//    for (let i = 1; i < n_rows; i++) {
+//      var row = rows[i];
+//      if ((row.length===1) && row[0]==="") // papaparse sometimes adds empty lines to files
+//        continue;
+//
+//      htmls.push("<tr>");
+//      var geneId = row[0];
+//      var geneSym = row[1];
+//      htmls.push(`<td><i><a data-gene="${geneSym}" class='text-primary tpLoadGeneLink' style="cursor: pointer;">${geneSym}</a></i>`);
+//      if (hubUrl!==null) {
+//        var fullHubUrl = hubUrl+"&position="+geneSym+"&singleSearch=knownCanonical";
+//        htmls.push("<a target=_blank class='link' style='margin-left: 10px; font-size:80%; color:#AAA' title='link to UCSC Genome Browser' href='"+fullHubUrl+"'>Genome</a>");
+//      }
+//      htmls.push("</td>");
+//
+//      for (var j = 2; j < row.length; j++) {
+//        var val = row[j];
+//        htmls.push("<td>");
+//        // added for the autism dataset, allows to add mouse overs with images
+//        // field has to start with ./
+//        if (val.startsWith("./")) {
+//          var imgUrl = val.replace("./", db.url+"/");
+//          var imgHtml = '<img width="100px" src="'+imgUrl+'">';
+//          val = "<a data-toggle='tooltip' data-placement='auto' class='tpPlots link' target=_blank title='"+imgHtml+"' href='"+ imgUrl + "'>plot</a>";
+//        }
+//        if (j===geneListCol || j===exprCol) {
+//          geneListFormat(htmls, val, geneSym);
+//        } else if (j===pValCol) {
+//          // htmls.push(parseFloat(val).toPrecision(5)); // five digits ought to be enough for everyone
+//          htmls.push(parseFloat(val).toPrecision(3))
+//          // htmls.push(+val);
+//        } else {
+//          // htmls.push(+val);
+//          htmls.push(parseFloat(val).toPrecision(3))
+//        }
+//        htmls.push("</td>");
+//      }
+//      htmls.push("</tr>");
+//    }
+//
+//    htmls.push("</tbody>");
+//    htmls.push("</table>");
+//
+//
+//    $("#"+divId).html(htmls.join(""));
+//    var sortOpt = {};
+//    //if (doDescSort)
+//      //sortOpt.descending=true;
+//    new Tablesort(document.getElementById(`tpMarkerTable-${clusterIndex}`));
+//    $(".tpLoadGeneLink").unbind("click")
+//    $(".tpLoadGeneLink").on("click", onMarkerGeneClick);
+//    // activateTooltip(".link");
+//    //
+//    // $(".nav-metadata").unbind("click")
+//    // $(".nav-metadata").on("click", onMetaClick);
+//    $("#meta-colorby").unbind("change")
+//    $("#meta-colorby").on("change", on_meta_colorby);
+//
+//    var ttOpt = {"html": true, "animation": false, "delay":{"show":100, "hide":100} };
+//    // $(".tpPlots").bsTooltip(ttOpt);
+//  }
 
   function onMarkerGeneClick(ev) {
     /* user clicks onto a gene in the table of the marker gene dialog window */
     var geneSym = ev.target.getAttribute("data-gene");
-    loadGeneAndColor(geneSym);
+    if (geneSym) {
+      loadGeneAndColor(geneSym);
+    }
   }
 
   function on_meta_colorby() {
