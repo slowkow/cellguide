@@ -3139,7 +3139,7 @@ var mybrowser = function() {
       })
     }
     const pval_labels = [
-      'P_value', 'pval', 'pvalue', 'P.Value', 'adj.P.Val' 'p_val', 'pVal', 'Chisq_P'
+      'P_value', 'pval', 'pvalue', 'P.Value', 'adj.P.Val' 'p_val', 'pVal', 'Chisq_P', 'fdr', 'FDR'
     ]
     for (var col = 1; col < headerRow.length; col++) {
       var coldata = headerRow[col].split("|")
