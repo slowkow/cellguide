@@ -3154,7 +3154,7 @@ var mybrowser = function() {
       if (coldata[1] === "float") {
         d["headerFilter"] = true
         d["headerFilterFunc"] = ">="
-        if (coldata[0] == "pct_out" || pval_labels.indexOf(coldata[0]) =! -1) {
+        if (coldata[0] == "pct_out" || pval_labels.indexOf(coldata[0]) != -1) {
           d["headerFilterFunc"] = "<="
         }
       }
