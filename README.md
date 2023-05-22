@@ -55,10 +55,10 @@ Demo scRNA-seq data from the research article by [Smillie et al. 2019][3].
 
 ### Step 1. Install Cell Browser
 
-We can install the Cell Browser Python package with pip:
+We can install the Cell Browser Python package with pip (we need a specific version):
 
 ```
-pip install cellbrowser
+pip install cellbrowser==0.7.15
 ```
 
 Or see the [Cell Browser installation instructions](https://cellbrowser.readthedocs.io/installation.html).
