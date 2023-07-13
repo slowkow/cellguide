@@ -1,5 +1,7 @@
 # Cell Guide 🧭 
 
+[![DOI](https://zenodo.org/badge/268866845.svg)](https://zenodo.org/badge/latestdoi/268866845)
+
 Navigate single-cell RNA-seq datasets in your web browser.
 
 Try it at https://cell.guide
